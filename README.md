@@ -27,4 +27,4 @@ Oracle gratefully acknowledges the contributions to open source projects that ha
 # License
 Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved.
 
-Describe here which license this project is licensed under, and keep the link to [LICENSE](./LICENSE) file.
+Licensed under the Universal Permissive License (UPL), Version 1.0. See [LICENSE](./LICENSE) for full license agreement.
