@@ -1,0 +1,30 @@
+{
+  "name": "cordova-plugin-wkwebview-file-xhr",
+  "version": "1.0.0",
+  "description": "Cordova WKWebView File XHR Plugin",
+  "cordova": {
+    "id": "cordova-plugin-wkwebview-file-xhr",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oracle/cordova-plugin-wkwebview-file-xhr"
+  },
+  "keywords": [
+    "cordova",
+    "wkwebview",
+    "ecosystem:cordova",
+    "cordova-ios"
+  ],
+  "scripts": {
+    "test": "npm run jshint",
+    "jshint": "node node_modules/jshint/bin/jshint www && node node_modules/jshint/bin/jshint src && node node_modules/jshint/bin/jshint tests"
+  },
+  "author": "oraclejet",
+  "license": "UPL-1.0",
+  "devDependencies": {
+    "jshint": "^2.6.0"
+  }
+}

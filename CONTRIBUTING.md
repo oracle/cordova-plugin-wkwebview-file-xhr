@@ -1,29 +1,12 @@
-# Contributing to Oracle GitHub projects
+# Contributing to cordova-plugin-wkwebview-file-xhr
 
-*Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2017 Oracle and/or its affiliates
+The Universal Permissive License (UPL), Version 1.0*
 
-Pull requests can be made under the OCA - 
-[Oracle Contributor Agreement](https://www.oracle.com/technetwork/community/oca-486395.html).
+**Pull requests are currently not being accepted for this project.**  
 
-If you have ideas you want to contribute back, please share them by first 
-[submitting Issues](https://help.github.com/articles/creating-an-issue/).
+We plan to provide this functionality in the future. At that time, 
+you will need to follow [The Oracle Contributor Agreement](https://www.oracle.com/technetwork/community/oca-486395.html)(OCA).
 
-For pull requests containing new code submission to be accepted into any project, 
-the bottom of your commit message must have the following line using your name and
-e-mail address as it appears in the OCA Signatories list.
-
-```
-Signed-off-by: Your Name <you@example.org>
-```
-
-This can be automatically added to pull requests by committing with:
-
-```
-git commit --signoff
-```
-
-Only pull requests from committers that can be verified as having
-signed the OCA can be accepted.
-
-Thanks,
-Oracle GitHub Team
+If you have ideas, comments, or issues related to generator, 
+swing on by the [Oracle JET discussion forum.](https://community.oracle.com/community/development_tools/oracle-jet)
