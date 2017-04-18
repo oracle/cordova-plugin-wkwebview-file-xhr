@@ -34,7 +34,7 @@ xhr.send();
 ## Running Plugin Tests
 Our plugin uses the [Cordova Plugin Test Framework](https://github.com/apache/cordova-plugin-test-framework/blob/master/README.md) for its test automation strategy.
 
-###Steps to Run
+### Steps to Run
 
 + Create a cordova project using the cordova CLI:
 
