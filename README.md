@@ -2,11 +2,11 @@
 
 ## About the cordova-plugin-wkwebview-file-xhr
 
-The plugin provides an XMLHttpRequest polyfill that allows loading resources from the "www" folder of the main resource bundle when using WKWebView.  The default behavior of WKWebView is to raise a cross origin exception when loading files from the main bundle using the file protocol - "file://".  This plugin works around this shortcoming by loading files via native code if the browsers current location has "file" protocol and the target URL passed to the open method of the XMLHttpRequest is relative. As a security measure, the plugin verifies that the standardized path of the target URL is within the "www" folder of the applications main bundle.
+The plugin provides an XMLHttpRequest polyfill that allows loading resources from the "www" folder of the main resource bundle when using WKWebView.  The default behavior of WKWebView is to raise a cross origin exception when loading files from the main bundle using the file protocol - "file://".  This plugin works around this shortcoming by loading files via native code if web view's current location has "file" protocol and the target URL passed to the open method of the XMLHttpRequest is relative. As a security measure, the plugin verifies that the standardized path of the target URL is within the "www" folder of the application's main bundle.
 
 ## Installation
 
-Plugin installation requires Cordova 4+, iOS 9+ and the WKWebView plugin - "cordova-plugin-wkwebview-engine".
+Plugin installation requires Cordova 4+ and iOS 9+. It will install the WKWebView plugin - "cordova-plugin-wkwebview-engine".
 
 ```
 cordova plugin add cordova-plugin-wkwebview-file-xhr
@@ -58,6 +58,7 @@ Our plugin uses the [Cordova Plugin Test Framework](https://github.com/apache/co
     cordova run ios
     
 ### Known Issues
++ Since the application's starting page is loaded from the device's file system, all XHR requests to remote endpoints are considered cross origin.  For such requests, WKWebView specifies "null" as the value of the Origin header, which will be rejected by endpoints that are configured to disallow requests from the null origin.
 
 ### [Contributing](CONTRIBUTING.md)
 This is an open source project maintained by Oracle Corp. Pull Requests are currently not being accepted. See [CONTRIBUTING](CONTRIBUTING.md) for details.
