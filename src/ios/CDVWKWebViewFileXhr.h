@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Oracle and/or its affiliates.
+ * Copyright (c) 2016, 2017 Oracle and/or its affiliates.
  *
  * The Universal Permissive License (UPL), Version 1.0
  *
@@ -34,11 +34,21 @@
 
 #import <Foundation/Foundation.h>
 #import <Cordova/CDVPlugin.h>
+#import <WebKit/WebKit.h>
 
-@interface CDVWKWebViewFileXhr : CDVPlugin
+NS_ASSUME_NONNULL_BEGIN
+
+@interface CDVWKWebViewFileXhr : CDVPlugin<WKScriptMessageHandler, NSURLSessionDelegate>
 
 /* Exec API */
 - (void)readAsText:(CDVInvokedUrlCommand*)command;
 - (void)readAsArrayBuffer:(CDVInvokedUrlCommand*)command;
+- (void) getConfig:(CDVInvokedUrlCommand*)command;
+
+@property (nonatomic, assign) BOOL  allowsInsecureLoads;
+@property (nonatomic, strong) NSString * interceptRemoteRequests;
+
 
 @end
+
+NS_ASSUME_NONNULL_END

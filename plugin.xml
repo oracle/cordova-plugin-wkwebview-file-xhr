@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- Copyright (c) 2016 Oracle and/or its affiliates.
+ Copyright (c) 2017 Oracle and/or its affiliates.
  
  The Universal Permissive License (UPL), Version 1.0
  
@@ -21,9 +21,9 @@
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     id="cordova-plugin-wkwebview-file-xhr"
-    version="1.0.0">
+    version="2.0.0">
     <name>Cordova WKWebView File XHR Plugin</name>
-    <description>XMLHttpRequest Polyfill that allows loading resources from the application bundle www folder</description>
+    <description>This plugin includes the Apache Cordova WKWebView plugin and resolves the issues of loading resources from the application bundle's www folder and sending XHR requests to remote endpoints.</description>
     <license>UPL 1.0</license> 
     <keywords>cordova,wkwebview,webview</keywords>
     <repo>https://alm.oraclecorp.com/uitech/#projects/uitech_cordova-plugins/scm/cordova-plugin-wkwebview-file-xhr.git</repo>
@@ -35,13 +35,20 @@
 
     <!-- ios -->
     <platform name="ios">
+
         <js-module src="src/www/ios/xhr-polyfill.js" name="xhr-polyfill">
             <runs/>
         </js-module>
-
+        <js-module src="src/www/ios/fetch-bootstrap.js" name="fetch-bootstrap">
+            <runs/>
+        </js-module>
+        <js-module src="src/www/ios/whatwg-fetch-2.0.3.js" name="fetch-polyfill">
+            <runs/>
+        </js-module>
         <config-file target="config.xml" parent="/*">
             <feature name="CDVWKWebViewFileXhr">
                 <param name="ios-package" value="CDVWKWebViewFileXhr" />
+                <param name="onload" value="true" />
             </feature>
         </config-file>
 

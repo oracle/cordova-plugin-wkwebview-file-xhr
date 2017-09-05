@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Oracle and/or its affiliates. 
+ * Copyright (c) 2016, 2017 Oracle and/or its affiliates.
  *
  * The Universal Permissive License (UPL), Version 1.0
  *
@@ -35,17 +35,114 @@
 #import "CDVWKWebViewFileXhr.h"
 #import <Cordova/CDV.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+
+@implementation NSDictionary(CDVWKWebViewFileXhr)
+
+/**
+ Convenience method to return a NSString from a dictionary
+
+ @param key The key to return
+ @return The value as a String, or nil
+ */
+- (nullable NSString *) cdvwkStringForKey:(NSString *)key
+{
+    NSObject* val = self[key];
+    if (val == nil)
+        return nil;
+    if ([val isKindOfClass:NSString.class])
+        return (NSString *)val;
+    return [NSString stringWithFormat:@"%@",val];
+}
+@end
+
+@interface CDVWKWebViewFileXhr()
+
+@property (nonatomic, retain) NSURLSession *urlSession;
+@property (nonatomic, retain) NSString *nativeXHRLogging;
+
+@end
+
+
+
 @implementation CDVWKWebViewFileXhr
 
+
+-(void) pluginInitialize {
+    [super pluginInitialize];
+    
+    if (![self.webView isKindOfClass:WKWebView.class])
+        return;
+    
+    // note:  settings translates all preferences to lower case
+    NSString *value = [self.commandDelegate.settings cdvwkStringForKey:@"allowuntrustedcerts"];
+    if (value != nil && [value compare:@"on" options:NSCaseInsensitiveSearch] == NSOrderedSame) {
+        _allowsInsecureLoads = YES;
+        NSLog(@"WARNING: NativeXHR is allowing untrusted certificates due to preference AllowUntrustedCerts=on");
+    }
+    
+    value = [self.commandDelegate.settings cdvwkStringForKey:@"interceptremoterequests"];
+    if (value != nil && 
+        ([value compare:@"all" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+         [value compare:@"secureOnly" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+         [value compare:@"none" options:NSCaseInsensitiveSearch] == NSOrderedSame)) {
+        _interceptRemoteRequests = value;
+    } else {
+        _interceptRemoteRequests = @"secureOnly";
+    }
+    
+    value = [self.commandDelegate.settings cdvwkStringForKey:@"nativexhrlogging"];
+    if (value != nil &&
+        ([value compare:@"none" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+         [value compare:@"full" options:NSCaseInsensitiveSearch] == NSOrderedSame)) {
+        _nativeXHRLogging = value;
+    } else {
+        _nativeXHRLogging = @"none";
+    }
+    
+    WKWebView *wkWebView = (WKWebView *) self.webView;
+    if ([_interceptRemoteRequests compare:@"all" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+        [_interceptRemoteRequests compare:@"secureOnly" options:NSCaseInsensitiveSearch] == NSOrderedSame) {
+
+        NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
+        [sessionConfiguration setRequestCachePolicy:NSURLRequestReloadIgnoringCacheData];
+        self.urlSession = [NSURLSession sessionWithConfiguration:sessionConfiguration delegate:self delegateQueue:nil];
+        [wkWebView.configuration.userContentController addScriptMessageHandler:self name:@"nativeXHR"];
+
+    }
+}
+
+- (void) dispose {
+    
+    if ([self.webView isKindOfClass:WKWebView.class]) {
+    
+        WKWebView *wkWebView = (WKWebView *) self.webView;
+        [wkWebView.configuration.userContentController removeScriptMessageHandlerForName:@"nativeXHR"];
+    }
+    [super dispose];
+
+}
 /*!
  * @param uri target relative file from the XMLHttpRequest polyfill
  * @return URL relative to the main bundle's www folder
  */
 -(NSURL*)getWebContentResourceURL: (NSString*) uri
 {
-    NSString *wwwuri = [NSString stringWithFormat:@"www/%@", uri];
-    NSURL *baseURL = [[NSBundle mainBundle] resourceURL];
-    return [NSURL URLWithString:wwwuri relativeToURL:baseURL];
+    NSURL *targetURL = nil;
+
+    if ([uri hasPrefix: @"file://"] || [uri hasPrefix: @"FILE://"])
+    {
+        targetURL = [NSURL URLWithString:uri];
+    }
+    else
+    {
+        NSURL *baseURL = [[NSBundle mainBundle] resourceURL];
+        NSString *wwwuri = [NSString stringWithFormat:@"www/%@", uri];
+        targetURL = [NSURL URLWithString:wwwuri relativeToURL:baseURL];
+    }
+    
+    return targetURL;
 }
 
 /*!
@@ -147,4 +244,170 @@
         }];
     }
 }
+
+- (void)getConfig:(CDVInvokedUrlCommand*)command {
+    
+    NSDictionary *dict = @{
+                           @"InterceptRemoteRequests" : _interceptRemoteRequests,
+                           @"NativeXHRLogging" : _nativeXHRLogging
+                          };
+    
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dict] callbackId:command.callbackId];
+}
+
+
+- (void)URLSession:(NSURLSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge
+ completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential * _Nullable credential))completionHandler {
+    
+    if (_allowsInsecureLoads) {
+        SecTrustRef serverTrust = challenge.protectionSpace.serverTrust;
+        CFDataRef exceptions = SecTrustCopyExceptions (serverTrust);
+        SecTrustSetExceptions (serverTrust, exceptions);
+        CFRelease (exceptions);
+        completionHandler (NSURLSessionAuthChallengeUseCredential, [NSURLCredential credentialForTrust:serverTrust]);
+        return;
+    }
+    completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);
+}
+
+
+// MARK: - WKScriptMessageHandler
+
+/**
+ * Performs an asynchronous network load of the requested resource using native networking routines.
+ *
+ * The request is described in the body parameter as a dictionary.  The supported keys are outlined below
+ *
+ *     Name     | Kind                     | Required | Description                    | Allowed Values
+ *     ---      | ---                      | ---      | ---                            | ---
+ *     id       | string                   | true     | A unique id used for callbacks | any valid non-empty string
+ *     callback | string                   | true     | a javascript function that will be invoked on callbacks | any valid javascript function
+ *     url      | string                   | true     | The URL to load                | A valid URL
+ *     method   | string                   | false    | The http method                | Valid HTTP method. Defaults to GET
+ *     headers  | object {string, string}  | false    | Additional request headers     |
+ *     body     | string (base 64 encoded) | false    | The http request body          |
+ *     timeout  | number                   | false    | Request timeout (seconds)      | any positive value
+ *
+ * The callback function takes two arguments.  The first argument is the unique identifier supplied in the request 
+ * object.  The second argument is a java object defining the HTTP result.
+ */
+- (void) performNativeXHR:(NSDictionary<NSString *, id> *) body inWebView:(WKWebView *) webView {
+    
+    NSString *requestId = [body cdvwkStringForKey:@"id"];
+    NSString *callbackFunction = [body cdvwkStringForKey:@"callback"];
+    NSString *urlString = [body cdvwkStringForKey:@"url"];
+    NSString *method = [body cdvwkStringForKey:@"method"];
+    
+    __weak WKWebView* weakWebView = webView;
+    
+    void(^sendResult)(NSDictionary *) = ^void(NSDictionary *result) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            NSError *jsonError;
+            NSData* json = [NSJSONSerialization dataWithJSONObject:result options:0 error:&jsonError];
+            
+            if (jsonError != nil) {
+                NSLog(@"NativeXHR: Failed to encode response to json: %@", jsonError.localizedDescription);
+                
+                NSString *script = [NSString stringWithFormat:@"try { %@('%@', {'error' : 'json serialization failed'}) } catch (e) { }", callbackFunction, requestId];
+                [weakWebView evaluateJavaScript:script completionHandler:nil];
+                return;
+            }
+            
+            NSString *script = [NSString stringWithFormat:@"try { %@('%@', %@) } catch (e) { }", callbackFunction, requestId, [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
+            [weakWebView evaluateJavaScript:script completionHandler:nil];
+
+        });
+    };
+    
+    
+    if (requestId.length == 0 || callbackFunction.length == 0 ) {
+        NSLog(@"NativeXHR: Required parameters id and callback url were not supplied.");
+        return;
+    }
+    
+    if (urlString.length == 0) {
+        return sendResult( @{ @"error" : @"Invalid url"});
+    }
+    
+    NSURL *url = [NSURL URLWithString:urlString];
+    
+    if (![url.scheme.lowercaseString isEqualToString:@"http"] && ![url.scheme.lowercaseString isEqualToString:@"https"]) {
+        NSString *msg = [NSString stringWithFormat:@"NativeXHR: Invalid url scheme '%@';  only http and https are supported by NativeXHR", url.scheme];
+        return sendResult( @{ @"error" : msg});
+    }
+    
+    __block NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    if (method.length)
+        request.HTTPMethod = [method uppercaseString];
+    
+    id val = [body objectForKey:@"timeout"];
+    if ([val isKindOfClass:NSNumber.class]) {
+        request.timeoutInterval = [(NSNumber *) val doubleValue];
+    }
+    
+    
+    val = [body objectForKey:@"headers"];
+    if ([val isKindOfClass:NSDictionary.class]) {
+        [(NSDictionary *) val enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+            if (![key isKindOfClass:NSString.class] || ![obj isKindOfClass:NSString.class])
+                return;
+            [request setValue:(NSString *)obj forHTTPHeaderField:(NSString *)key];
+        }];
+    }
+    
+    NSString *body64 = [body cdvwkStringForKey:@"body"];
+    if (body64.length) {
+        request.HTTPBody = [[NSData alloc] initWithBase64EncodedString:body64 options:0];
+    }
+    
+    NSURLSessionDataTask *task = [self.urlSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        
+        NSMutableDictionary* result = [NSMutableDictionary dictionary];
+        
+        if (data != nil) {
+            result[@"data"] = [[NSString alloc] initWithData:[data base64EncodedDataWithOptions:0] encoding:NSUTF8StringEncoding];
+        }
+        if (response != nil) {
+            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+            dictionary[@"expectedContentLength"] = @(response.expectedContentLength);
+            dictionary[@"suggestedFileName"] = response.suggestedFilename;
+            dictionary[@"mimeType"] = response.MIMEType;
+            dictionary[@"url"] = response.URL.absoluteString;
+            dictionary[@"textEncodingName"] = response.textEncodingName;
+            if ([response isKindOfClass:NSHTTPURLResponse.class]) {
+                NSHTTPURLResponse* urlResponse = (NSHTTPURLResponse *) response;
+                dictionary[@"allHeaderFields"] = urlResponse.allHeaderFields;
+                dictionary[@"statusCode"] = @(urlResponse.statusCode);
+                dictionary[@"localizedStatusCode"] = [NSHTTPURLResponse localizedStringForStatusCode:urlResponse.statusCode];                    
+            }
+            
+            result[@"response"] = dictionary;
+        }
+        
+        if (error != nil) {
+            result[@"error"] = [error localizedDescription];
+            result[@"underlyingErrorCode"] = @(error.code);
+        }
+        sendResult(result);
+    }];
+    
+    task.taskDescription = requestId;
+    [task resume];
+}
+
+- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message {
+    
+    if (![message.name isEqualToString:@"nativeXHR"] || ![message.body isKindOfClass:NSDictionary.class]) {
+        NSLog(@"NativeXHR: Invalid script message '%@' with body '%@' received.  Ignoring.", message.name, message.body);
+        return;
+    }
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [self performNativeXHR:message.body inWebView:message.webView];
+    });
+    
+}
+
 @end
+
+NS_ASSUME_NONNULL_END

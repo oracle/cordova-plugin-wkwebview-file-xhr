@@ -1,64 +1,69 @@
-# cordova-plugin-wkwebview-file-xhr 1.0.0
+# cordova-plugin-wkwebview-file-xhr 2.0.0
 
 ## About the cordova-plugin-wkwebview-file-xhr
 
-The plugin provides an XMLHttpRequest polyfill that allows loading resources from the "www" folder of the main resource bundle when using WKWebView.  The default behavior of WKWebView is to raise a cross origin exception when loading files from the main bundle using the file protocol - "file://".  This plugin works around this shortcoming by loading files via native code if web view's current location has "file" protocol and the target URL passed to the open method of the XMLHttpRequest is relative. As a security measure, the plugin verifies that the standardized path of the target URL is within the "www" folder of the application's main bundle.
+This plugin makes it possible to reap the performance benefits of using the WKWebView in your Cordova app by resolving the following issues:
+
+* The default behavior of WKWebView is to raise a cross origin exception when loading files from the main bundle using the file protocol - "file://".  This plugin works around this shortcoming by loading files via native code if the web view's current location has "file" protocol and the target URL passed to the open method of the XMLHttpRequest is relative. As a security measure, the plugin verifies that the standardized path of the target URL is within the "www" folder of the application's main bundle.
+
+* Since the application's starting page is loaded from the device's file system, all XHR requests to remote endpoints are considered cross origin.  For such requests, WKWebView specifies "null" as the value of the Origin header, which will be rejected by endpoints that are configured to disallow requests from the null origin. This plugin works around that issue by handling all remote requests at the native layer where the origin header will be excluded.
 
 ## Installation
 
-Plugin installation requires Cordova 4+ and iOS 9+. It will install the WKWebView plugin - "cordova-plugin-wkwebview-engine".
+Plugin installation requires Cordova 4+ and iOS 9+. It will install the Apache Cordova WKWebView plugin `cordova-plugin-wkwebview-engine`.
 
 ```
 cordova plugin add cordova-plugin-wkwebview-file-xhr
 ```
 
-Supported Platforms
-------------------
+## Supported Platforms
 
 * iOS
 
-Quick Example
-------------
+## Quick Example
 
 ```
+// read local resource
 var xhr = XMLHttpRequest();
-xhr.addEventListener("loadend", function(evt) 
+xhr.addEventListener("loadend", function(evt)
  {
    var data = this.responseText;
-   document.getElementById("myregion").innerHtml = data; 
+   document.getElementById("myregion").innerHtml = data;
  });
 xhr.open("GET", "js/views/customers.html");
 xhr.send();
+
+// post to remote endpoint
+var xhr = XMLHttpRequest();
+xhr.addEventListener("loadend", function(evt)
+ {
+   var product = this.response;
+   document.getElementById("productId").value = product.id;
+   document.getElementById("productName").value = product.name;
+ });
+xhr.open("POST", "http://myremote/endpoint/product");
+xhr.responseType = "json";
+xhr.setRequestHeader("Content-Type", "application/json");
+xhr.setRequestHeader("Accept", "application/json");
+xhr.send(JSON.stringify({name: "Product 99"}));
+
 ```
 
-## Running Plugin Tests
-Our plugin uses the [Cordova Plugin Test Framework](https://github.com/apache/cordova-plugin-test-framework/blob/master/README.md) for its test automation strategy.
+## Configuration
 
-### Steps to Run
+The following configuration options modify the default behavior of the plugin.  The values are specified in
+config.xml as preferences:
 
-+ Create a cordova project using the cordova CLI:
+<ul>
+ <li>AllowUntrustedCerts: on|off (default: off).  If "on", requests routed to the native implementation will accept self signed SSL certificates. This preference should only be enabled for testing purposes.</li>
+ <li>InterceptRemoteRequests: all|secureOnly|none (default: secureOnly). Controls what types of remote XHR requests are intercepted and handled by the plugin. The plugin always intercepts requests with the file:// protocol. By default, the plugin will intercept only secure protocol requests ("https").</li>
+ <li>NativeXHRLogging: none|full (default: none).  If "full" the javascript layer will produce logging of the XHR requests sent through the native to the javascript console.  Note:  natively routed XHR requests will not appear in the web inspector utility when "InterceptRemoteRequests" is "all" or "secureOnly".</li>
+</ul>
 
-    cordova create test oj.test TestFileXhr
-    cd test
-    cordova platform add ios
-  
-+ Install the test harness:
-
-    cordova plugin add http://git-wip-us.apache.org/repos/asf/cordova-plugin-test-framework.git
-
-+ Change the start page in "`test/config.xml`" with `<content src="cdvtests/index.html"/>`.
-+ Install "`cordova-plugin-wkwebview-file-xhr`" plugin and associated tests:
-
-    cordova plugin add https://github.com/oracle/cordova-plugin-wkwebview-file-xhr.git
-    cordova plugin add https://github.com/oracle/cordova-plugin-wkwebview-file-xhr.git#/tests
-
-+ Open the Xcode project "`test/platforms/ios/TestFileXhr.xcodeproj`" in the Xcode IDE and run.  Alternatively, use the cordova CLI:
-
-    cordova build
-    cordova run ios
-    
 ### Known Issues
-+ Since the application's starting page is loaded from the device's file system, all XHR requests to remote endpoints are considered cross origin.  For such requests, WKWebView specifies "null" as the value of the Origin header, which will be rejected by endpoints that are configured to disallow requests from the null origin.
+The plugin caches cookies at the native layer between requests but it does not attempt to sync cookies between the WKWebView and the native sessions. From the JavaScript context, this means "document.cookie" won't contain any cookies returned from XHR handled at the native layer and the native iOS XHR will not see any cookies returned from remote resources fetched by the browser context, such as images.
+
+Whilst this plugin resolves the main issues preventing the use of the Apache Cordova WKWebView plugin, there are other [known issues](https://issues.apache.org/jira/browse/CB-12074?jql=project%20%3D%20CB%20AND%20status%20%3D%20Open%20AND%20labels%20%3D%20wkwebview-known-issues) with that plugin.
 
 ### [Contributing](CONTRIBUTING.md)
 This is an open source project maintained by Oracle Corp. Pull Requests are currently not being accepted. See [CONTRIBUTING](CONTRIBUTING.md) for details.
@@ -66,4 +71,3 @@ This is an open source project maintained by Oracle Corp. Pull Requests are curr
 ### [License](LICENSE.md)
 Copyright (c) 2017 Oracle and/or its affiliates
 The Universal Permissive License (UPL), Version 1.0
-
