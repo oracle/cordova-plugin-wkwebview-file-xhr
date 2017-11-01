@@ -611,6 +611,35 @@ exports.defineAutoTests = function ()
       xhr.send(JSON.stringify({id: 99, name: "Product 99"}));
     });
 
+    it("POST 500 server error", function (done)
+    {
+      var events = [];
+      function logEvents(event)
+      {
+        events.push(event.type);
+      }
+
+      function loadend(evt)
+      {
+        expect(this.status).toBe(500);
+        expect(this.response).toBeDefined();
+        expect(events).toContain("loadstart");
+        expect(events).toContain("progress");
+        expect(events).not.toContain("error");
+        done();
+      }
+
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST",
+        SECURE_TESTS_DOMAIN + "/RestApp-ViewController-context-root/exceptionservlet");
+      xhr.onloadend = loadend;
+      xhr.onloadstart = logEvents;
+      xhr.onprogress = logEvents;
+      xhr.onerror = logEvents;
+ 
+      xhr.send(" ");
+    });
+    
     it("POST timeout", function (done)
     {
       var events = [];
@@ -855,6 +884,8 @@ exports.defineAutoTests = function ()
      */
   });
 
+  /*
+  // commented out the PSR tests as they take several minutes to run
   describe('PSR Remote:', function ()
   {
     function getMbBuffer(numMbs)
@@ -1050,5 +1081,7 @@ exports.defineAutoTests = function ()
       });
     }, 240000);
   });
+  
+  */
 };
 
