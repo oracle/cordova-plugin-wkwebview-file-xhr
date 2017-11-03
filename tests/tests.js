@@ -19,6 +19,83 @@ exports.defineAutoTests = function ()
     delete expects[id];
   }
 
+  describe('FormData Polyfill:', function ()
+  {
+    it("https:// mixed types document response", function (done)
+    {
+
+      function loadend(evt)
+      {
+        expect(this.readyState).toBe(this.DONE);
+        expect(this.status).toBe(200);
+        expect(this.response instanceof Document).toEqual(true);
+        expect(this.response.querySelector("#field1").textContent).toEqual("1");
+        expect(this.response.querySelector("#field2").textContent).toEqual("2");
+        expect(this.response.querySelector("#file1").textContent).toEqual("Content of Blob 1");
+        expect(this.response.querySelector("#file1").getAttribute("filename")).toEqual("file1.txt");   
+        expect(this.response.querySelector("#file2").textContent).toEqual("Content of Blob 2");
+        expect(this.response.querySelector("#file2").getAttribute("filename")).toEqual("file2.txt");
+        done();
+      }
+
+      var fd = new FormData();
+      fd.append("field1", "1");
+      fd.append("field2", "2");
+      
+      var file1 = new Blob(["Content of Blob 1"], {type: "text/html"});
+      fd.append("file1", file1, "file1.txt");
+
+      var file2 = new Blob(["Content of Blob 2"], {type: "text/html"});
+      fd.append("file2", file2, "file2.txt");
+
+      var xhr = new XMLHttpRequest();
+      xhr.addEventListener("loadend", loadend);
+      xhr.open("POST",
+        SECURE_TESTS_DOMAIN + "/RestApp-ViewController-context-root/servletmultipart");
+      xhr.responseType = "document";
+      xhr.send(fd);
+
+    });
+    
+    it("http:// mixed types document response", function (done)
+    {
+      // uses native FormData thru the Delegate to the native XMLHttpRequest
+      
+      function loadend(evt)
+      {
+        expect(this.readyState).toBe(this.DONE);
+        expect(this.status).toBe(200);
+        expect(this.response instanceof Document).toEqual(true);
+        expect(this.response.querySelector("#field1").textContent).toEqual("1");
+        expect(this.response.querySelector("#field2").textContent).toEqual("2");
+        expect(this.response.querySelector("#file1").textContent).toEqual("Content of Blob 1");
+        expect(this.response.querySelector("#file1").getAttribute("filename")).toEqual("file1.txt");   
+        expect(this.response.querySelector("#file2").textContent).toEqual("Content of Blob 2");
+        expect(this.response.querySelector("#file2").getAttribute("filename")).toEqual("file2.txt");
+        done();
+      }
+
+      var fd = new FormData();
+      fd.append("field1", "1");
+      fd.append("field2", "2");
+      
+      var file1 = new Blob(["Content of Blob 1"], {type: "text/html"});
+      fd.append("file1", file1, "file1.txt");
+
+      var file2 = new Blob(["Content of Blob 2"], {type: "text/html"});
+      fd.append("file2", file2, "file2.txt");
+
+      var xhr = new XMLHttpRequest();
+      xhr.addEventListener("loadend", loadend);
+      xhr.open("POST",
+        NONSECURE_TESTS_DOMAIN + "/RestApp-ViewController-context-root/servletmultipart");
+      xhr.responseType = "document";
+      xhr.send(fd);
+
+    });
+
+  });
+
   describe('http:// GET remote:', function ()
   {
     it("responseType text, loadend addEventListener", function (done)
@@ -276,30 +353,31 @@ exports.defineAutoTests = function ()
       xhr.send(inBuff);
     });
 
-    /*
-     * TODO Safari only implements the append function on the FormData?
-     it("post FormData with responseType text, onloadend listener", function (done)
-     {
-     var fd = new FormData();
-     fd.append("param1", "1");
-     fd.append("param2", "2");
-     
-     function loadend(event)
-     {
-     expect(this.status).toBe(200);
-     expect(this.response).toBeDefined();
-     expect(this.response).toEqual("param1=1&param2=2");
-     done();
-     }
-     
-     var xhr = new XMLHttpRequest();
-     xhr.onloadend = loadend;
-     xhr.open("POST", "http://den01cxr.us.oracle.com:7101/RestApp-ViewController-context-root/playbackservlet");
-     xhr.responseType = "text";
-     xhr.send(fd);
-     
-     });
-     */
+   
+    it("post FormData with responseType text, onloadend listener", function (done)
+    {
+      var fd = new FormData();
+      fd.append("param1", "1");
+      fd.append("param2", "2");
+
+      function loadend(event)
+      {
+        expect(this.status).toBe(200);
+        expect(this.response).toBeDefined();        
+        expect(this.response).toContain('content-disposition: form-data; name="param1"');
+        expect(this.response).toContain('content-disposition: form-data; name="param2"');
+        done();
+      }
+
+      var xhr = new XMLHttpRequest();
+      xhr.onloadend = loadend;
+      xhr.open("POST",
+        SECURE_TESTS_DOMAIN + "/RestApp-ViewController-context-root/playbackservlet");
+      xhr.responseType = "text";
+      var runit = false;
+      xhr.send(fd);
+
+    });
 
     it("post document with responseType document, onloadend listener", function (done)
     {
@@ -364,16 +442,16 @@ exports.defineAutoTests = function ()
   describe('file:// GET:', function ()
   {
     _resolveUri = function (uri)
-    {    
+    {
       var resolver = document.createElement("a");
       document.body.appendChild(resolver);
       resolver.href = uri;
-      var absoluteUri = resolver.href; 
+      var absoluteUri = resolver.href;
       resolver.parentNode.removeChild(resolver);
       return absoluteUri;
     };
-    
-    
+
+
     it("responseType text, loadend addEventListener", function (done)
     {
 
@@ -392,7 +470,7 @@ exports.defineAutoTests = function ()
       xhr.send();
 
     });
-    
+
     it("responseType text, absolute URL, loadend addEventListener", function (done)
     {
 
@@ -411,8 +489,8 @@ exports.defineAutoTests = function ()
       xhr.open("GET", uri);
       xhr.send();
 
-    });    
-    
+    });
+
     it("responseType text, loadend onloadend", function (done)
     {
 
@@ -636,10 +714,10 @@ exports.defineAutoTests = function ()
       xhr.onloadstart = logEvents;
       xhr.onprogress = logEvents;
       xhr.onerror = logEvents;
- 
+
       xhr.send(" ");
     });
-    
+
     it("POST timeout", function (done)
     {
       var events = [];
@@ -885,203 +963,203 @@ exports.defineAutoTests = function ()
   });
 
   /*
-  // commented out the PSR tests as they take several minutes to run
-  describe('PSR Remote:', function ()
-  {
-    function getMbBuffer(numMbs)
-    {
-      if (isNaN(numMbs))
-        numMbs = 1;
-
-      var fillArray = [];
-      var bytes = numMbs * 1048576;
-      fillArray.length = bytes;
-      fillArray.fill(0, 0, bytes);
-
-      return new Int8Array(fillArray);
-    }
-
-    function getMbString(numMbs)
-    {
-      if (isNaN(numMbs))
-        numMbs = 1;
-
-      var fillArray = [];
-      var bytes = numMbs * 1048576;
-      fillArray.length = bytes;
-      fillArray.fill(0, 0, bytes);
-
-      return fillArray.join("");
-    }
-
-    var logSummary = [];
-    function logMeasure(test, buffsize, startTs)
-    {
-      var totalSecs = ((performance.now() - startTs) / 1000);
-      var totalMb = buffsize / 1048576;
-      var mbPerSecs = totalSecs / totalMb; 
-      
-      
-      var msg = [test, "send/recieve", buffsize, "bytes in", + 
-        totalSecs, 
-        "sec(s)."].join(" ");
-      
-      var tokens = test.split(" ");
-      logSummary.push(['"' + tokens[0] + '"',
-                     '"' + tokens[1] + '"',
-                     tokens[2],
-                     totalMb, 
-                     totalSecs,
-                     mbPerSecs].join(","));
-      
-      console.log(msg);
-    }
-    
-    function dumpLogSummary()
-    {
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST",
-        SECURE_TESTS_DOMAIN +
-        "/RestApp-ViewController-context-root/rest/products/postPsrLog");
-      xhr.responseType = "text";
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.setRequestHeader("Accept", "text/html");
-      xhr.send(logSummary.join("\n"));
-      logSummary = [];
-    }
-
-    function psrTest(description, sizeInMb, resonseType, xhr, resolve)
-    {
-      var buff;
-      if ("arraybuffer" === resonseType)
-        buff = getMbBuffer(sizeInMb);
-      else if ("text" === resonseType)
-        buff = getMbString(sizeInMb);
-
-      var startTs;
-
-      function loadend(evt)
-      {
-        expect(this.status).toBe(200);
-        expect(this.response).toBeDefined();
-
-        var size = Number.NaN;
-        if ("arraybuffer" === resonseType && this.response && !isNaN(this.response['byteLength']))
-          size = this.response.byteLength;
-        else if ("text" === resonseType && this.response && !isNaN(this.response['length']))
-          size = this.response.length;
-
-        logMeasure(description, size, startTs);
-        resolve(true);
-      }
-
-      xhr.onloadend = loadend;
-      xhr.open("POST",
-        NONSECURE_TESTS_DOMAIN + "/RestApp-ViewController-context-root/playbackservlet");
-      xhr.responseType = resonseType;
-
-      startTs = performance.now();
-      xhr.send(buff);
-    }
-
-    function sendXHR(description, sizeInMB, resonseType, xhr)
-    {
-      var execCallback = psrTest.bind(this, description, sizeInMB, resonseType, xhr);
-      return new Promise(execCallback);
-    }
-
-    var MAX_RETRIES = 3;
-    var MAX_MB = 5;
-    
-    function forEach(responseType, xhrType, retry, sizeInMb)
-    {
-      if (isNaN(retry))
-        retry = 1;
-      if (isNaN(sizeInMb))
-        sizeInMb = 1;
-      
-      var description = [xhrType, responseType, retry].join(" ");
-
-      var xhr;
-      if (xhrType === "NativeJS")
-      {
-        xhr = new window._XMLHttpRequest();
-      }
-      else if (xhrType === "DelegateNativeJS")
-      {
-        xhr = new XMLHttpRequest();
-        xhr.__setInterceptRemoteRequests("none");
-      }
-      else if (xhrType === "NativeIOS")
-      {
-        xhr = new XMLHttpRequest();
-        xhr.__setInterceptRemoteRequests("all");
-      }
-
-      return sendXHR(description, sizeInMb, responseType, xhr).then(function ()
-      {
-        if (MAX_RETRIES < ++retry)
-        {
-          retry = 1;
-          if (MAX_MB < ++sizeInMb)
-            return Promise.resolve(true);
-        }
-        
-        return forEach(responseType, xhrType, retry, sizeInMb);            
-      });
-    }
-
-    it("Native JS arraybuffer send/recieve", function (done)
-    {
-      forEach("arraybuffer", "NativeJS").then(function ()
-      {
-        done();
-      });
-    }, 240000);
-
-    it("Delegate Native JS arraybuffer send/recieve", function (done)
-    {
-      forEach("arraybuffer", "DelegateNativeJS").then(function ()
-      {
-        done();
-      });
-    }, 240000);
-
-    it("Native IOS arraybuffer send/recieve", function (done)
-    {
-      forEach("arraybuffer", "NativeIOS").then(function ()
-      {
-        done();
-      });
-    }, 240000);
-
-
-    it("Native JS text send/recieve", function (done)
-    {
-      forEach("text", "NativeJS").then(function ()
-      {
-        done();
-      });
-    }, 240000);
-
-    it("Delegate Native JS text send/recieve", function (done)
-    {
-      forEach("text", "DelegateNativeJS").then(function ()
-      {
-        done();
-      });
-    }, 240000);
-
-    it("Native IOS text send/recieve", function (done)
-    {
-      forEach("text", "NativeIOS").then(function ()
-      {
-        done();
-        dumpLogSummary();
-      });
-    }, 240000);
-  });
-  
-  */
+   // commented out the PSR tests as they take several minutes to run
+   describe('PSR Remote:', function ()
+   {
+   function getMbBuffer(numMbs)
+   {
+   if (isNaN(numMbs))
+   numMbs = 1;
+   
+   var fillArray = [];
+   var bytes = numMbs * 1048576;
+   fillArray.length = bytes;
+   fillArray.fill(0, 0, bytes);
+   
+   return new Int8Array(fillArray);
+   }
+   
+   function getMbString(numMbs)
+   {
+   if (isNaN(numMbs))
+   numMbs = 1;
+   
+   var fillArray = [];
+   var bytes = numMbs * 1048576;
+   fillArray.length = bytes;
+   fillArray.fill(0, 0, bytes);
+   
+   return fillArray.join("");
+   }
+   
+   var logSummary = [];
+   function logMeasure(test, buffsize, startTs)
+   {
+   var totalSecs = ((performance.now() - startTs) / 1000);
+   var totalMb = buffsize / 1048576;
+   var mbPerSecs = totalSecs / totalMb; 
+   
+   
+   var msg = [test, "send/recieve", buffsize, "bytes in", + 
+   totalSecs, 
+   "sec(s)."].join(" ");
+   
+   var tokens = test.split(" ");
+   logSummary.push(['"' + tokens[0] + '"',
+   '"' + tokens[1] + '"',
+   tokens[2],
+   totalMb, 
+   totalSecs,
+   mbPerSecs].join(","));
+   
+   console.log(msg);
+   }
+   
+   function dumpLogSummary()
+   {
+   var xhr = new XMLHttpRequest();
+   xhr.open("POST",
+   SECURE_TESTS_DOMAIN +
+   "/RestApp-ViewController-context-root/rest/products/postPsrLog");
+   xhr.responseType = "text";
+   xhr.setRequestHeader("Content-Type", "application/json");
+   xhr.setRequestHeader("Accept", "text/html");
+   xhr.send(logSummary.join("\n"));
+   logSummary = [];
+   }
+   
+   function psrTest(description, sizeInMb, resonseType, xhr, resolve)
+   {
+   var buff;
+   if ("arraybuffer" === resonseType)
+   buff = getMbBuffer(sizeInMb);
+   else if ("text" === resonseType)
+   buff = getMbString(sizeInMb);
+   
+   var startTs;
+   
+   function loadend(evt)
+   {
+   expect(this.status).toBe(200);
+   expect(this.response).toBeDefined();
+   
+   var size = Number.NaN;
+   if ("arraybuffer" === resonseType && this.response && !isNaN(this.response['byteLength']))
+   size = this.response.byteLength;
+   else if ("text" === resonseType && this.response && !isNaN(this.response['length']))
+   size = this.response.length;
+   
+   logMeasure(description, size, startTs);
+   resolve(true);
+   }
+   
+   xhr.onloadend = loadend;
+   xhr.open("POST",
+   NONSECURE_TESTS_DOMAIN + "/RestApp-ViewController-context-root/playbackservlet");
+   xhr.responseType = resonseType;
+   
+   startTs = performance.now();
+   xhr.send(buff);
+   }
+   
+   function sendXHR(description, sizeInMB, resonseType, xhr)
+   {
+   var execCallback = psrTest.bind(this, description, sizeInMB, resonseType, xhr);
+   return new Promise(execCallback);
+   }
+   
+   var MAX_RETRIES = 3;
+   var MAX_MB = 5;
+   
+   function forEach(responseType, xhrType, retry, sizeInMb)
+   {
+   if (isNaN(retry))
+   retry = 1;
+   if (isNaN(sizeInMb))
+   sizeInMb = 1;
+   
+   var description = [xhrType, responseType, retry].join(" ");
+   
+   var xhr;
+   if (xhrType === "NativeJS")
+   {
+   xhr = new window._XMLHttpRequest();
+   }
+   else if (xhrType === "DelegateNativeJS")
+   {
+   xhr = new XMLHttpRequest();
+   xhr.__setInterceptRemoteRequests("none");
+   }
+   else if (xhrType === "NativeIOS")
+   {
+   xhr = new XMLHttpRequest();
+   xhr.__setInterceptRemoteRequests("all");
+   }
+   
+   return sendXHR(description, sizeInMb, responseType, xhr).then(function ()
+   {
+   if (MAX_RETRIES < ++retry)
+   {
+   retry = 1;
+   if (MAX_MB < ++sizeInMb)
+   return Promise.resolve(true);
+   }
+   
+   return forEach(responseType, xhrType, retry, sizeInMb);            
+   });
+   }
+   
+   it("Native JS arraybuffer send/recieve", function (done)
+   {
+   forEach("arraybuffer", "NativeJS").then(function ()
+   {
+   done();
+   });
+   }, 240000);
+   
+   it("Delegate Native JS arraybuffer send/recieve", function (done)
+   {
+   forEach("arraybuffer", "DelegateNativeJS").then(function ()
+   {
+   done();
+   });
+   }, 240000);
+   
+   it("Native IOS arraybuffer send/recieve", function (done)
+   {
+   forEach("arraybuffer", "NativeIOS").then(function ()
+   {
+   done();
+   });
+   }, 240000);
+   
+   
+   it("Native JS text send/recieve", function (done)
+   {
+   forEach("text", "NativeJS").then(function ()
+   {
+   done();
+   });
+   }, 240000);
+   
+   it("Delegate Native JS text send/recieve", function (done)
+   {
+   forEach("text", "DelegateNativeJS").then(function ()
+   {
+   done();
+   });
+   }, 240000);
+   
+   it("Native IOS text send/recieve", function (done)
+   {
+   forEach("text", "NativeIOS").then(function ()
+   {
+   done();
+   dumpLogSummary();
+   });
+   }, 240000);
+   });
+   
+   */
 };
 

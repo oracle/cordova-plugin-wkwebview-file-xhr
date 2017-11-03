@@ -316,17 +316,21 @@
       "FormData": {
         convert: function (reqContext)
         {
-          if (!reqContext.requestHeaders["content-type"])
-            reqContext.requestHeaders["content-type"] = "application/x-www-form-urlencoded;";
-
           var body = reqContext.requestData;
-          var entries = [];
-          var keys = body.keys();
-          for (var i = 0; i < keys.length; i++)
-            entries.push([encodeURIComponent(keys[i]), 
-              encodeURIComponent(body.get(keys[i]))].join("="));
-          var mimeType = reqContext.requestHeaders["content-type"];
-          return HttpHandler._convertTextToBinaryBase64String(mimeType, entries.join("&"));
+          var promise = new Promise(function (resolve, reject)
+          {
+            // FormData polyfill - request the body and context-type
+            body.__getMultipartRequest().then(function (parts)
+            {
+              if (!reqContext.requestHeaders["content-type"])
+                reqContext.requestHeaders["content-type"] = parts.contentType;
+           
+              var mimeType = reqContext.requestHeaders["content-type"];
+              resolve(HttpHandler._convertTextToBinaryBase64String(mimeType, parts.body));
+            });
+          });
+          
+          return promise;
         }
       },
       "Blob": {
@@ -391,8 +395,6 @@
           return HttpHandler._convertTextToBinaryBase64String(mimeType, body);
         }
       }
-
-
     };
 
   HttpHandler._convertEncode64StringToText = function(mimeType, encoding, r)
@@ -819,6 +821,10 @@
 
     var requestData = reqContext.requestData;
     reqContext.requestData = undefined;
+    
+    // returns a native FormData from the plugin's polyfill
+    if (FormData.prototype.isPrototypeOf(requestData))
+      requestData = requestData.__getNative();  
 
     delegate.send(requestData);
   };

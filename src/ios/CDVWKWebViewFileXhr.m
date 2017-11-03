@@ -261,11 +261,14 @@ NS_ASSUME_NONNULL_BEGIN
     
     if (_allowsInsecureLoads) {
         SecTrustRef serverTrust = challenge.protectionSpace.serverTrust;
-        CFDataRef exceptions = SecTrustCopyExceptions (serverTrust);
-        SecTrustSetExceptions (serverTrust, exceptions);
-        CFRelease (exceptions);
-        completionHandler (NSURLSessionAuthChallengeUseCredential, [NSURLCredential credentialForTrust:serverTrust]);
-        return;
+        if (serverTrust) {
+          CFDataRef exceptions = SecTrustCopyExceptions (serverTrust);
+          SecTrustSetExceptions (serverTrust, exceptions);
+          CFRelease (exceptions);
+          completionHandler (NSURLSessionAuthChallengeUseCredential, [NSURLCredential credentialForTrust:serverTrust]);
+         
+          return;
+        }
     }
     completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);
 }
@@ -402,8 +405,11 @@ NS_ASSUME_NONNULL_BEGIN
         NSLog(@"NativeXHR: Invalid script message '%@' with body '%@' received.  Ignoring.", message.name, message.body);
         return;
     }
+    __weak __typeof(message.webView) weakWebView = message.webView;
+    NSDictionary<NSString *, id> *body = message.body;
+
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [self performNativeXHR:message.body inWebView:message.webView];
+        [self performNativeXHR:body inWebView:weakWebView];
     });
     
 }

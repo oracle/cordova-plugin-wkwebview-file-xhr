@@ -21,7 +21,7 @@
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     id="cordova-plugin-wkwebview-file-xhr"
-    version="2.0.0">
+    version="2.1.0">
     <name>Cordova WKWebView File XHR Plugin</name>
     <description>This plugin includes the Apache Cordova WKWebView plugin and resolves the issues of loading resources from the application bundle's www folder and sending XHR requests to remote endpoints.</description>
     <license>UPL 1.0</license> 
@@ -35,7 +35,9 @@
 
     <!-- ios -->
     <platform name="ios">
-
+        <js-module src="src/www/ios/formdata-polyfill.js" name="formdata-polyfill">
+            <runs/>
+        </js-module>
         <js-module src="src/www/ios/xhr-polyfill.js" name="xhr-polyfill">
             <runs/>
         </js-module>
@@ -45,6 +47,7 @@
         <js-module src="src/www/ios/whatwg-fetch-2.0.3.js" name="fetch-polyfill">
             <runs/>
         </js-module>
+
         <config-file target="config.xml" parent="/*">
             <feature name="CDVWKWebViewFileXhr">
                 <param name="ios-package" value="CDVWKWebViewFileXhr" />

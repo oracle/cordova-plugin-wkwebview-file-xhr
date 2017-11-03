@@ -1,4 +1,4 @@
-# cordova-plugin-wkwebview-file-xhr 2.0.0
+# cordova-plugin-wkwebview-file-xhr 2.1.0
 
 ## About the cordova-plugin-wkwebview-file-xhr
 
@@ -34,7 +34,7 @@ xhr.open("GET", "js/views/customers.html");
 xhr.send();
 
 // post to remote endpoint
-var xhr = XMLHttpRequest();
+var xhr = new XMLHttpRequest();
 xhr.addEventListener("loadend", function(evt)
  {
    var product = this.response;
