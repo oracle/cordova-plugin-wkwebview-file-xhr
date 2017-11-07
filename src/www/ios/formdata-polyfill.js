@@ -50,7 +50,7 @@
     if (!HTMLFormElement.prototype.isPrototypeOf(formElement))
       return;
 
-    var elements = formElement.elements();
+    var elements = formElement.elements;
     for (var i = 0; i < elements.length; i++)
     {
       var element = elements[i];
@@ -78,9 +78,7 @@
         this.append(name, element.value);
       }
     }
-    ;
   }
-  ;
 
   __FormData.prototype.get = function (name)
   {
@@ -184,8 +182,19 @@
 
     return __FormData._makeIterator(allentries);
   };
+  
+  __FormData.prototype.forEach = function(callback)
+  {
+    var eit = this.entries();
+    var entry = eit.next();
+    while(!entry.done)
+    {
+      callback.call(this, entry.value[1], entry.value[0], this);
+      entry = eit.next();
+    }  
+  };
 
-  __FormData.toString = function ()
+  __FormData.prototype.toString = function ()
   {
     return "[object, FormData]";
   };

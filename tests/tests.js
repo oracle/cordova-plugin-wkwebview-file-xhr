@@ -17,10 +17,149 @@ exports.defineAutoTests = function ()
   {
     expects[id](result);
     delete expects[id];
-  }
+  };
+
 
   describe('FormData Polyfill:', function ()
   {
+    it("basic API", function (done)
+    {
+      var fd = new FormData();
+      
+      // set & get
+      fd.set("foo", "bar1");
+      expect(fd.get("foo")).toBe("bar1");
+      
+      // append & get
+      fd.append("foo", "bar2");
+      expect(fd.get("foo")).toBe("bar1");
+      
+      // getAll
+      var values = fd.getAll("foo");
+      expect(values).toContain("bar1");
+      expect(values).toContain("bar2");
+      
+      // values
+      var vit = fd.values();
+      var e = vit.next();
+      expect(e.done).toBe(false);
+      expect(e.value).toBe("bar1");
+      var e = vit.next();
+      expect(e.done).toBe(false);      
+      expect(e.value).toBe("bar2");
+      var e = vit.next();
+      expect(e.done).toBe(true);      
+      
+      // entries
+      var eit = fd.entries();
+      e = eit.next();
+      expect(e.done).toBe(false);      
+      expect(e.value[0]).toBe("foo");
+      expect(e.value[1]).toBe("bar1");
+      e = eit.next();
+      expect(e.done).toBe(false);      
+      expect(e.value[0]).toBe("foo");
+      expect(e.value[1]).toBe("bar2");
+      e = eit.next();
+      expect(e.done).toBe(true);
+      
+      // has, get && delete
+      fd.set("bar", "foo");
+      expect(fd.get("bar")).toBe("foo");
+      expect(fd.has("bar")).toBe(true);
+      fd.delete("bar");  
+      expect(fd.get("bar")).toBe(undefined);
+      expect(fd.has("bar")).toBe(false);
+      
+      // keys
+      fd.set("bar", "foo");
+      var kit = fd.keys();
+      e = kit.next();
+      expect(e.done).toBe(false);
+      expect(e.value).toBe("foo");
+      e = kit.next();
+      expect(e.done).toBe(false);
+      expect(e.value).toBe("bar");
+      e = kit.next();
+      expect(e.done).toBe(true);
+      
+      // forEach
+      var i = 0;
+      fd.forEach(function (value, key, fd) 
+      {
+        expect(["bar1", "bar2", "foo"]).toContain(value);
+        expect(["foo", "bar"]).toContain(key);
+        expect(fd).toBeDefined();
+        expect(fd.set).toBeDefined();
+        expect(fd.get).toBeDefined();
+        i++;
+      });
+
+      expect(i).toBe(3);
+      
+      done();
+      
+    });
+    
+    it("HtmlFormElement constructor", function (done)
+    {
+      function createForm()
+      {
+        var node = document.createElement("form");
+        return node;
+      }
+      
+      function createInputText()
+      {
+        var node = document.createElement("input");
+        node.id = "in1";
+        node.name = "input1";
+        node.value = "value1";
+        return node;
+      }
+      
+      function createSelectSingle()
+      {
+        var select = document.createElement("select");
+        select.id = "select1";
+        
+        var option = document.createElement("option");
+        option.value = "option1";
+        select.appendChild(option);
+        
+        option = document.createElement("option");
+        option.value = "option2";
+        option.selected = true;
+        select.appendChild(option);
+        
+        return select;
+      }
+      
+      function createCheckbox()
+      {
+        var node = document.createElement("input");
+        node.id = "checkbox1";
+        node.type = "checkbox";
+        node.value = "checked1";
+        node.checked = true;
+        return node;
+      }
+      
+      var form = createForm();
+      form.appendChild(createInputText());
+      form.appendChild(createSelectSingle());
+      form.appendChild(createCheckbox());
+      document.body.appendChild(form);
+      
+      var fd = new FormData(form);
+      expect(fd.get("input1")).toBe("value1");
+      expect(fd.get("select1")).toBe("option2");
+      expect(fd.get("checkbox1")).toBe("checked1");
+      
+      document.body.removeChild(form);
+      done();
+    });
+    
     it("https:// mixed types document response", function (done)
     {
 
