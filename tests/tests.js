@@ -168,6 +168,8 @@ exports.defineAutoTests = function ()
         expect(this.readyState).toBe(this.DONE);
         expect(this.status).toBe(200);
         expect(this.response instanceof Document).toEqual(true);
+        expect(this.response.querySelector("#request-content-type").textContent)
+              .toContain("multipart/form-data");
         expect(this.response.querySelector("#field1").textContent).toEqual("1");
         expect(this.response.querySelector("#field2").textContent).toEqual("2");
         expect(this.response.querySelector("#file1").textContent).toEqual("Content of Blob 1");
@@ -205,6 +207,8 @@ exports.defineAutoTests = function ()
         expect(this.readyState).toBe(this.DONE);
         expect(this.status).toBe(200);
         expect(this.response instanceof Document).toEqual(true);
+        expect(this.response.querySelector("#request-content-type").textContent)
+              .toContain("multipart/form-data");
         expect(this.response.querySelector("#field1").textContent).toEqual("1");
         expect(this.response.querySelector("#field2").textContent).toEqual("2");
         expect(this.response.querySelector("#file1").textContent).toEqual("Content of Blob 1");
@@ -232,7 +236,7 @@ exports.defineAutoTests = function ()
       xhr.send(fd);
 
     });
-
+    
   });
 
   describe('http:// GET remote:', function ()

@@ -1,0 +1,14 @@
+# Change Log
+
+## cordova-plugin-wkwebview-file-xhr v2.1.0 (TBD)
+* Added FormData polyfill that works in tandem with the XMLHttpRequest polyfill (issue #4).
+* Fixed issues with iOS 11 (issue #6).
+* Fixed incorrect firing of the onerror event (issue #9).
+
+## cordova-plugin-wkwebview-file-xhr v2.0.0 (9/20/2017)
+* Introduced a new feature to intercept remote XHR requests bypassing wkwebivew's CORS handling.
+* Bundled in the [whatwg-fetch](https://github.com/github/fetch) polyfill.
+* Added several new configuration preferences. See See [README](README.md#configuration).
+
+## cordova-plugin-wkwebview-file-xhr v1.0.0
+* Bypassed wkwebview CORS handling of the XMLHttpRequest when loading file:// resources.

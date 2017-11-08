@@ -319,14 +319,15 @@
           var body = reqContext.requestData;
           var promise = new Promise(function (resolve, reject)
           {
+            var contentType = reqContext.requestHeaders["content-type"]; 
+            
             // FormData polyfill - request the body and context-type
-            body.__getMultipartRequest().then(function (parts)
+            body.__getRequestParts().then(function (parts)
             {
-              if (!reqContext.requestHeaders["content-type"])
+              if (!contentType)
                 reqContext.requestHeaders["content-type"] = parts.contentType;
-           
-              var mimeType = reqContext.requestHeaders["content-type"];
-              resolve(HttpHandler._convertTextToBinaryBase64String(mimeType, parts.body));
+              
+              resolve(HttpHandler._convertTextToBinaryBase64String(contentType, parts.body));
             });
           });
           

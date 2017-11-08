@@ -41,7 +41,7 @@ xhr.addEventListener("loadend", function(evt)
    document.getElementById("productId").value = product.id;
    document.getElementById("productName").value = product.name;
  });
-xhr.open("POST", "http://myremote/endpoint/product");
+xhr.open("POST", "https://myremote/endpoint/product");
 xhr.responseType = "json";
 xhr.setRequestHeader("Content-Type", "application/json");
 xhr.setRequestHeader("Accept", "application/json");
@@ -64,6 +64,9 @@ config.xml as preferences:
 The plugin caches cookies at the native layer between requests but it does not attempt to sync cookies between the WKWebView and the native sessions. From the JavaScript context, this means "document.cookie" won't contain any cookies returned from XHR handled at the native layer and the native iOS XHR will not see any cookies returned from remote resources fetched by the browser context, such as images.
 
 Whilst this plugin resolves the main issues preventing the use of the Apache Cordova WKWebView plugin, there are other [known issues](https://issues.apache.org/jira/browse/CB-12074?jql=project%20%3D%20CB%20AND%20status%20%3D%20Open%20AND%20labels%20%3D%20wkwebview-known-issues) with that plugin.
+
+### [Changes](CHANGELOG.md)
+See [CHANGELOG](CHANGELOG.md).
 
 ### [Contributing](CONTRIBUTING.md)
 This is an open source project maintained by Oracle Corp. Pull Requests are currently not being accepted. See [CONTRIBUTING](CONTRIBUTING.md) for details.

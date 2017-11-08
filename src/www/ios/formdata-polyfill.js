@@ -38,7 +38,7 @@
  * 
  * Two additional functions in this FormData implementation:
  * 1) __getNative - returns the native Safari FormData object.
- * 2) __getMultipartRequest - returns a promise resolving an object {contentType:string, body:string}.
+ * 2) __getRequestParts - returns a promise resolving an object {contentType:string, body:string}.
  */
 'use strict';
 (function ()
@@ -199,25 +199,14 @@
     return "[object, FormData]";
   };
 
-  __FormData.prototype.__getMultipartRequest = function ()
+  __FormData.prototype.__getRequestParts = function ()
   {
     var promise = new Promise(function (resolve)
     {
       __FormData._getRequestValues(this.entries()).then(function (entries)
       {
-        var boundary = "----cordovaPluginWkwebviewFileXhrFormdata" + Math.random().toString(32);
-        var parts = {"contentType": "multipart/form-data; boundary=" + boundary, body: ""};
-        var bodyEntries = [];
-
-        for (var i = 0; i < entries.length; i++)
-        {
-          var entry = entries[i];
-          bodyEntries.push(__FormData._generateMultiPartFormData(entry, boundary));
-        }
-
-        bodyEntries.push("--" + boundary + "--");
-        parts.body = bodyEntries.join("");
-
+        var parts = __FormData._getMultipartRequest(entries);
+        
         resolve(parts);
       });
     }.bind(this));
@@ -241,6 +230,24 @@
     }
 
     return fd;
+  };
+
+  __FormData._getMultipartRequest = function (entries)
+  {
+    var boundary = "----cordovaPluginWkwebviewFileXhrFormdata" + Math.random().toString(32);
+    var parts = {"contentType": "multipart/form-data; boundary=" + boundary, body: ""};
+    var bodyEntries = [];
+
+    for (var i = 0; i < entries.length; i++)
+    {
+      var entry = entries[i];
+      bodyEntries.push(__FormData._generateMultipartFormData(entry, boundary));
+    }
+
+    bodyEntries.push("--" + boundary + "--");
+    parts.body = bodyEntries.join("");
+    
+    return parts;
   };
 
   __FormData._makeIterator = function (array)
@@ -280,7 +287,7 @@
 
       if (value &&
         (Blob.prototype.isPrototypeOf(value) ||
-          File.prototype.isPrototypeOf(value)))
+         File.prototype.isPrototypeOf(value)))
       {
 
         var filename = value.name;
@@ -309,7 +316,7 @@
     return promise;
   };
 
-  __FormData._generateMultiPartFormData = function (entry, boundary)
+  __FormData._generateMultipartFormData = function (entry, boundary)
   {
     var data = "";
 
