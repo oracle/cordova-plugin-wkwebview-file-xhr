@@ -196,7 +196,7 @@
 
   __FormData.prototype.toString = function ()
   {
-    return "[object, FormData]";
+    return "[object FormData]";
   };
 
   __FormData.prototype.__getRequestParts = function ()
