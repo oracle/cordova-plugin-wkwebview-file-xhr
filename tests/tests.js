@@ -97,6 +97,9 @@ exports.defineAutoTests = function ()
 
       expect(i).toBe(3);
       
+      // angularJS uses the toString in the $http service for isFormData check
+      expect(fd.toString()).toBe("[object FormData]");
+      
       done();
       
     });
@@ -163,6 +166,7 @@ exports.defineAutoTests = function ()
     it("https:// mixed types document response", function (done)
     {
 
+      var file3Content = btoa("Content of Blob 3");
       function loadend(evt)
       {
         expect(this.readyState).toBe(this.DONE);
@@ -176,6 +180,9 @@ exports.defineAutoTests = function ()
         expect(this.response.querySelector("#file1").getAttribute("filename")).toEqual("file1.txt");   
         expect(this.response.querySelector("#file2").textContent).toEqual("Content of Blob 2");
         expect(this.response.querySelector("#file2").getAttribute("filename")).toEqual("file2.txt");
+        expect(this.response.querySelector("#file3").textContent).toEqual(file3Content);
+        expect(this.response.querySelector("#file3").getAttribute("filename")).toEqual("file3.txt");
+
         done();
       }
 
@@ -188,6 +195,9 @@ exports.defineAutoTests = function ()
 
       var file2 = new Blob(["Content of Blob 2"], {type: "text/html"});
       fd.append("file2", file2, "file2.txt");
+
+      var file3 = new Blob([file3Content]);
+      fd.append("file3", file3, "file3.txt");
 
       var xhr = new XMLHttpRequest();
       xhr.addEventListener("loadend", loadend);
