@@ -247,6 +247,59 @@ exports.defineAutoTests = function ()
 
     });
     
+    it("download/upload/binary compare", function(done)
+    {
+      // 1) download an image as a blob
+      // 2) add the blob to a form data and send it back to the server as a multipart form
+      // 3) server performs a binary compare of the original file to the uploaded
+      // 4) returns a document response with the results of the compare
+
+      var downloadPromise = new Promise(function (resolve, reject)
+      {
+        var xhr = new XMLHttpRequest();
+        xhr.onloadend = function (event)
+        {          
+          resolve(xhr.response);
+        };
+        xhr.onerror = function (event)
+        {
+          reject(xhr.response);
+          
+        };
+        
+        xhr.responseType = "blob";
+        xhr.open("GET", SECURE_TESTS_DOMAIN + "/RestApp-ViewController-context-root/servletmultipartplayback");
+        xhr.send();
+      });
+      
+      downloadPromise.then(function (blob) 
+      {
+        expect(blob).toBeDefined();
+        expect(blob instanceof Blob).toEqual(true);
+        expect(blob.type).toEqual("image/png");
+        
+        var fd = new FormData();
+        fd.append("simple-test", blob, "simple-test.html");
+        
+        var xhr = new XMLHttpRequest();
+        xhr.onloadend = function ()
+        {
+          expect(this.readyState).toBe(this.DONE);
+          expect(this.status).toBe(200);
+          expect(this.response instanceof Document).toEqual(true);
+          expect(this.response.querySelector("#are-same").textContent).toEqual("true");
+          done();
+        };
+        xhr.responseType = "document";
+        xhr.open("POST", SECURE_TESTS_DOMAIN + "/RestApp-ViewController-context-root/servletmultipartplayback");
+        xhr.send(fd);
+     
+      });
+      
+      
+    }, 120000);
+    
+    
   });
 
   describe('http:// GET remote:', function ()

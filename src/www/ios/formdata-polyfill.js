@@ -241,11 +241,12 @@
     for (var i = 0; i < entries.length; i++)
     {
       var entry = entries[i];
-      bodyEntries.push(__FormData._generateMultipartFormData(entry, boundary));
+      for (var data of __FormData._generateMultipartFormData(entry, boundary)) 
+        bodyEntries.push(data);
     }
 
     bodyEntries.push("--" + boundary + "--");
-    parts.body = bodyEntries.join("");
+    parts.body = new Blob(bodyEntries, {type: "application/octet-stream"});
     
     return parts;
   };
@@ -305,11 +306,11 @@
           resolve({name: name, value: reader.error, filename: filename, type: type});
         };
 
-        reader.readAsBinaryString(value);
+        reader.readAsArrayBuffer(value);
       }
       else
       {
-        promise = resolve({name: name, value: "" + value});
+        promise = resolve({name: name, value: value});
       }
     });
 
@@ -318,24 +319,31 @@
 
   __FormData._generateMultipartFormData = function (entry, boundary)
   {
-    var data = "";
+    var data = [];
 
-    data += "--" + boundary + "\r\n";
+    data.push("--" + boundary + "\r\n");
     if (!entry['filename'])
     {
-      data += 'content-disposition: form-data; name="' + entry.name + '"\r\n';
-      data += '\r\n';
-      data += entry.value + "\r\n";
+      data.push('content-disposition: form-data; name="');
+      data.push(entry.name);
+      data.push('"\r\n');
+      data.push('\r\n');
+      data.push(entry.value);
+      data.push("\r\n");
     }
     else
     {
       // Describe it as form data
-      data += 'content-disposition: form-data; ';
-      data += 'name="' + entry.name + '"; ';
-      data += 'filename="' + entry.filename + '"\r\n';
-      data += 'Content-Type: ' + entry.type + '\r\n';
-      data += '\r\n';
-      data += entry.value + '\r\n';
+      data.push('content-disposition: form-data; name="');
+      data.push(entry.name)
+      data.push('"; filename="');
+      data.push(entry.filename);
+      data.push('"\r\n');
+      data.push('Content-Type: ');
+      data.push(entry.type);
+      data.push('\r\n\r\n');
+      data.push(entry.value);
+      data.push('\r\n');
     }
 
     return data;

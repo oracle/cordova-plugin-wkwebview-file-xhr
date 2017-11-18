@@ -327,7 +327,19 @@
               if (!contentType)
                 reqContext.requestHeaders["content-type"] = parts.contentType;
               
-              resolve(HttpHandler._convertTextToBinaryBase64String(contentType, parts.body));
+              var reader = new FileReader();
+              reader.onload = function ()
+              {
+                var base64str = btoa(reader.result);
+                resolve(base64str);
+              };
+              reader.onerror = function ()
+              {
+                var base64str = btoa(reader.error);
+                reject(base64str);
+              };
+
+              reader.readAsBinaryString(parts.body);
             });
           });
           
