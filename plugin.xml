@@ -23,10 +23,10 @@
     id="cordova-plugin-wkwebview-file-xhr"
     version="2.1.0">
     <name>Cordova WKWebView File XHR Plugin</name>
-    <description>This plugin includes the Apache Cordova WKWebView plugin and resolves the issues of loading resources from the application bundle's www folder and sending XHR requests to remote endpoints.</description>
+    <description>This plugin includes the Apache Cordova WKWebView plugin and resolves XHR Cross-Origin Resource Sharing (CORS) constraints.</description>
     <license>UPL 1.0</license> 
     <keywords>cordova,wkwebview,webview</keywords>
-    <repo>https://alm.oraclecorp.com/uitech/#projects/uitech_cordova-plugins/scm/cordova-plugin-wkwebview-file-xhr.git</repo>
+    <repo>https://github.com/oracle/cordova-plugin-wkwebview-file-xhr.git</repo>
     <dependency id="cordova-plugin-wkwebview-engine" />
     <engines>
       <engine name="cordova-ios" version=">=4.0.0" />
