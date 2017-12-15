@@ -22,7 +22,7 @@ cordova plugin add cordova-plugin-wkwebview-file-xhr
 
 ## Quick Example
 
-```
+```javascript
 // read local resource
 var xhr = XMLHttpRequest();
 xhr.addEventListener("loadend", function(evt)
@@ -30,6 +30,7 @@ xhr.addEventListener("loadend", function(evt)
    var data = this.responseText;
    document.getElementById("myregion").innerHtml = data;
  });
+
 xhr.open("GET", "js/views/customers.html");
 xhr.send();
 
@@ -41,12 +42,12 @@ xhr.addEventListener("loadend", function(evt)
    document.getElementById("productId").value = product.id;
    document.getElementById("productName").value = product.name;
  });
+
 xhr.open("POST", "https://myremote/endpoint/product");
 xhr.responseType = "json";
 xhr.setRequestHeader("Content-Type", "application/json");
 xhr.setRequestHeader("Accept", "application/json");
 xhr.send(JSON.stringify({name: "Product 99"}));
-
 ```
 
 ## Configuration
