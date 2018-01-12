@@ -1109,7 +1109,9 @@
 
   window.XMLHttpRequest.prototype.setRequestHeader = function (header, value)
   {
-    header = header.toLowerCase();
+    // normalize value pair to strings
+    header = String(header).toLowerCase();;
+    value = String(value);
     this._context.requestHeaders[header] = value;
   };
 

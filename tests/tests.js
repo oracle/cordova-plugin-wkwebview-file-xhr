@@ -1143,6 +1143,37 @@ exports.defineAutoTests = function ()
       window.webkit.messageHandlers.nativeXHR.postMessage(xhr);
     });
 
+  describe('Custom Headers', function ()
+  {
+    it("normalize types", function (done)
+    {
+      var html = "<html><body><h1>Hello World</h1></body></html>";
+
+      var now = new Date();
+      
+      function loadend(evt)
+      {
+        expect(this.status).toBe(200);
+        expect(this.response).toBeDefined();
+        expect(this.response).toEqual(html);
+        expect(this.getResponseHeader("x-custom-1")).toEqual("42");
+        expect(this.getResponseHeader("x-custom-2")).toEqual("1,2,3");
+        expect(this.getResponseHeader("x-custom-3")).toEqual(now.toString());
+        done();
+      }
+
+      var xhr = new XMLHttpRequest();
+      xhr.addEventListener("loadend", loadend);
+      xhr.setRequestHeader("x-custom-1", 42);
+      xhr.setRequestHeader("x-custom-2", [1, 2, 3]);
+      xhr.setRequestHeader("x-custom-3", now);
+      xhr.open("POST",
+        SECURE_TESTS_DOMAIN + "/RestApp-ViewController-context-root/playbackservlet");
+      xhr.responseType = "text";
+      xhr.send(html);
+    });
+
+  });
     /* 
      This test is disabled due to the endpoint.  The application's config.xml must be configured with
      the AllowUntrustedCerts = on preference to enable support for self signed certificates
