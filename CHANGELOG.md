@@ -1,5 +1,8 @@
 # Change Log
 
+## cordova-plugin-wkwebview-file-xhr v2.1.1 (TBD)
+* XMLHttpRequest setRequestHeader normalizes the value pair to string types (issue #13).
+
 ## cordova-plugin-wkwebview-file-xhr v2.1.0 (12/1/2017)
 * Added a FormData polyfill that works in tandem with the XMLHttpRequest polyfill (issue #4).
 * Fixed compatibility issues with iOS 11 (issue #6).
