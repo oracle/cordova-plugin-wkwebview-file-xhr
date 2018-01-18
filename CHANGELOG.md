@@ -1,6 +1,6 @@
 # Change Log
 
-## cordova-plugin-wkwebview-file-xhr v2.1.1 (TBD)
+## cordova-plugin-wkwebview-file-xhr v2.1.1 (01/18/2018)
 * XMLHttpRequest setRequestHeader normalizes the value pair to string types (issue #13).
 
 ## cordova-plugin-wkwebview-file-xhr v2.1.0 (12/1/2017)
