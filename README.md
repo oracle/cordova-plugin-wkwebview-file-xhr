@@ -24,7 +24,7 @@ cordova plugin add cordova-plugin-wkwebview-file-xhr
 
 ```javascript
 // read local resource
-var xhr = XMLHttpRequest();
+var xhr = new XMLHttpRequest();
 xhr.addEventListener("loadend", function(evt)
  {
    var data = this.responseText;
