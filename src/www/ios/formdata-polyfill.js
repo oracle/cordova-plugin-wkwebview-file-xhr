@@ -64,13 +64,13 @@
         for (var file of element.files)
           this.append(name, file);
       }
-      else if (element.type === 'select-multiple' || element.type === 'select-one') {
+      else if (element.type === 'select-multiple' || element.type === 'select-one')
       {
         for (var option of element) {
           !option.disabled && option.selected && this.append(name, opt.value);
         }
       }
-      else if (element.type === 'checkbox' || element.type === 'radio') {
+      else if (element.type === 'checkbox' || element.type === 'radio')
       {
         if (element.checked) {
           this.append(name, element.value);
