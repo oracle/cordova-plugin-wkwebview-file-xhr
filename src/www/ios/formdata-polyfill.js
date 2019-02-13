@@ -72,7 +72,9 @@
       }
       else if (element.type === 'checkbox' || element.type === 'radio') {
       {
-        element.checked && this.append(name, element.value);
+        if (element.checked) {
+          this.append(name, element.value);
+        }
       }
       else
       {
