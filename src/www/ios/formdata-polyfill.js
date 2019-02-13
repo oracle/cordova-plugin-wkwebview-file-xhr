@@ -66,12 +66,13 @@
         for (var file of element.files)
           this.append(name, file);
       }
-      else if (['select-multiple', 'select-one'].indexOf(element.value) > -1)
+      else if (element.type === 'select-multiple' || element.type === 'select-one') {
       {
-        for (var option of element.selectedOptions)
-          this.append(name, option);
+        for (var option of element) {
+          !option.disabled && option.selected && this.append(name, opt.value);
+        }
       }
-      else if (['checkbox', 'radio'].indexOf(element.value) > -1)
+      else if (element.type === 'checkbox' || element.type === 'radio') {
       {
         if (element.checked) {
           this.append(name, element.value);
