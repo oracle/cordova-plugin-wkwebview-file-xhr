@@ -58,6 +58,8 @@
       var name = element.name ? element.name : element.id;
       if (!name)
         continue;
+      
+      console.log("form data element", name, element.type, element.value);
 
       if (element.type === 'file')
       {
@@ -69,9 +71,11 @@
         for (var option of element.selectedOptions)
           this.append(name, option);
       }
-      else if (['checkbox', 'radio'].indexOf(element.value) > -1 && element.checked)
+      else if (['checkbox', 'radio'].indexOf(element.value) > -1)
       {
-        this.append(name, element.value);
+        if (element.checked) {
+          this.append(name, element.value);
+        }
       }
       else
       {
