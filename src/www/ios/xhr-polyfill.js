@@ -187,11 +187,10 @@
     if (this._isTraceLoggingEnabled())
       console.log("xhr-polyfill.js - native file XHR Response: Unable to find file %o\n%o", reqContext.url, e);
 
-    reqContext.dispatchReadyStateChangeEvent(2);  // HEADERS_RECIEVED
-
     reqContext.status = 404;
     reqContext.responseText = "File Not Found";
 
+    reqContext.dispatchReadyStateChangeEvent(2); // HEADERS_RECIEVED
     reqContext.dispatchReadyStateChangeEvent(3); // LOADING
     reqContext.dispatchProgressEvent("progress");
 
@@ -208,8 +207,6 @@
     var mimeType = FileHandler._getMimeType(reqContext);
     var convertedResult = rspTypeHandler.convert(mimeType, result);
 
-    reqContext.dispatchReadyStateChangeEvent(2); // HEADERS_RECIEVED
-
     var respSize = rspTypeHandler.responseSize();
     for (var i = 0; i < rspTypeHandler.properties.length; i++)
       reqContext[rspTypeHandler.properties[i]] = convertedResult;
@@ -218,6 +215,7 @@
     reqContext.statusText = "OK";
     reqContext.responseURL = reqContext.url;
 
+    reqContext.dispatchReadyStateChangeEvent(2); // HEADERS_RECIEVED
     reqContext.dispatchReadyStateChangeEvent(3); // LOADING
     reqContext.dispatchProgressEvent("progress", respSize);
     reqContext.dispatchReadyStateChangeEvent(4); // DONE
@@ -647,8 +645,6 @@
 
     reqContext.responseHeaders = normalizedHeaders;
 
-    reqContext.dispatchReadyStateChangeEvent(2); // HEADERS_RECIEVED
-
     reqContext.responseURL = payload.response.url;
     reqContext.status = payload.response.statusCode;
     reqContext.statusText = payload.response.localizedStatusCode;
@@ -658,6 +654,7 @@
 
     var respSize = rspTypeHandler.responseSize();
 
+    reqContext.dispatchReadyStateChangeEvent(2); //HEADERS_RECIEVED
     reqContext.dispatchReadyStateChangeEvent(3); //LOADING
     reqContext.dispatchProgressEvent("progress", respSize);
     reqContext.dispatchReadyStateChangeEvent(4); //DONE
@@ -668,7 +665,6 @@
 
   HttpHandler._error = function (reqContext, error, underlyingErrorCode)
   {
-    reqContext.dispatchReadyStateChangeEvent(2); //HEADERS_RECIEVED
     var isTimeout = (HttpHandler._UNDERLYING_ERROR_CODES.NSURLErrorTimedOut === underlyingErrorCode);
 
     if (isTimeout)
@@ -683,6 +679,7 @@
       reqContext.responseText = error;
     }
 
+    reqContext.dispatchReadyStateChangeEvent(2); //HEADERS_RECIEVED
     reqContext.dispatchReadyStateChangeEvent(3); //LOADING
     reqContext.dispatchProgressEvent("progress");
     reqContext.dispatchReadyStateChangeEvent(4); //DONE
