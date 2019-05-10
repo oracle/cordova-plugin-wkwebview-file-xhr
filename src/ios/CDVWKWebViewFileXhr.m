@@ -107,7 +107,7 @@ NS_ASSUME_NONNULL_BEGIN
 
         NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
         [sessionConfiguration setRequestCachePolicy:NSURLRequestReloadIgnoringCacheData];
-        self.urlSession = [NSURLSession sessionWithConfiguration:sessionConfiguration delegate:self delegateQueue:nil];
+        self.urlSession = [NSURLSession sessionWithConfiguration:sessionConfiguration delegate:self delegateQueue:nil]; // FortityFalsePositive
         [wkWebView.configuration.userContentController addScriptMessageHandler:self name:@"nativeXHR"];
 
     }
@@ -265,7 +265,7 @@ NS_ASSUME_NONNULL_BEGIN
           CFDataRef exceptions = SecTrustCopyExceptions (serverTrust);
           SecTrustSetExceptions (serverTrust, exceptions);
           CFRelease (exceptions);
-          completionHandler (NSURLSessionAuthChallengeUseCredential, [NSURLCredential credentialForTrust:serverTrust]);
+          completionHandler (NSURLSessionAuthChallengeUseCredential, [NSURLCredential credentialForTrust:serverTrust]); // FortityFalsePositive
          
           return;
         }
@@ -311,7 +311,7 @@ NS_ASSUME_NONNULL_BEGIN
             NSData* json = [NSJSONSerialization dataWithJSONObject:result options:0 error:&jsonError];
             
             if (jsonError != nil) {
-                NSLog(@"NativeXHR: Failed to encode response to json: %@", jsonError.localizedDescription);
+                NSLog(@"NativeXHR: Failed to encode response to json: %@", jsonError.localizedDescription); // FortityFalsePositive
                 
                 NSString *script = [NSString stringWithFormat:@"try { %@('%@', {'error' : 'json serialization failed'}) } catch (e) { }", callbackFunction, requestId];
                 [weakWebView evaluateJavaScript:script completionHandler:nil];
@@ -365,7 +365,7 @@ NS_ASSUME_NONNULL_BEGIN
         request.HTTPBody = [[NSData alloc] initWithBase64EncodedString:body64 options:0];
     }
     
-    NSURLSessionDataTask *task = [self.urlSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+    NSURLSessionDataTask *task = [self.urlSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) { // FortityFalsePositive
         
         NSMutableDictionary* result = [NSMutableDictionary dictionary];
         
