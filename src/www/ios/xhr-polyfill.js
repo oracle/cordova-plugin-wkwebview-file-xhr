@@ -247,7 +247,7 @@
 
   HttpHandler._generateId = function ()
   {
-    return [performance.now().toString(16), Math.random().toString(16)].join("-");
+    return [performance.now().toString(16), Math.random().toString(16)].join("-");  // FortifyFalsePositive
   };
 
   HttpHandler._convertTextToBinaryBase64String = function(mimeType, text)
@@ -1211,7 +1211,7 @@
 
   window.XMLHttpRequest.prototype.open = function (method, url, async, user, password)
   {
-    this._context.method = !method ? "GET" : method.toUpperCase();
+    this._context.method = !method ? "GET" : method.toUpperCase();  // FortifyFalsePositive
     this._context.url = url;
     this._context.async = async === undefined ? true : async;
     this._context.user = user;
