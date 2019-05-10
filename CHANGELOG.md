@@ -1,6 +1,7 @@
 # Change Log
 ## cordova-plugin-wkwebovew-file-xhr v2.1.2 (TBD)
 * allow funky characters in the URL (issue #25)
+* simulating file not found condition was firing the HEADERS_RECIEVED ready state change before setting the response status code (issue #33)
 
 ## cordova-plugin-wkwebview-file-xhr v2.1.1 (01/18/2018)
 * XMLHttpRequest setRequestHeader normalizes the value pair to string types (issue #13).
