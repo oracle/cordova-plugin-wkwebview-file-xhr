@@ -886,7 +886,9 @@
         if (context.interceptRemoteRequests)           // backdoor to override per instance
           interceptRemoteRequests = context.interceptRemoteRequests;
 
-        if ("GET" === context.method && typeof context.url === "string" &&
+        if (typeof context.url === "string" && context.url.toLowerCase().startsWith("blob:"))
+          resolve(new DelegateHandler(context, config)); // blob url
+        else if ("GET" === context.method && typeof context.url === "string" &&
           ((context.url.indexOf("://") === -1 && window.location.protocol === "file:") ||
            (context.url.toLowerCase().startsWith("file://"))))
         {
