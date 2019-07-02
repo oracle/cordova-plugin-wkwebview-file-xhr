@@ -1019,7 +1019,7 @@
 
 
   // define readonly const properties
-  ["UNSENT", "OPENED", "HEADERS_RECIEVED", "LOADING", "DONE"].forEach(function (propName, i)
+  ["UNSENT", "OPENED", "HEADERS_RECEIVED", "LOADING", "DONE"].forEach(function (propName, i)
   {
     Object.defineProperty(window.XMLHttpRequest.prototype, propName,
       {
