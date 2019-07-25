@@ -1,6 +1,6 @@
 # cordova-plugin-wkwebview-file-xhr 2.1.1
 
-## About the cordova-plugin-wkwebview-file-xhr
+## About cordova-plugin-wkwebview-file-xhr plugin
 
 This plugin makes it possible to reap the performance benefits of using the WKWebView in your Cordova app by resolving the following issues:
 
