@@ -107,7 +107,7 @@ NS_ASSUME_NONNULL_BEGIN
 
         NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
         [sessionConfiguration setRequestCachePolicy:NSURLRequestReloadIgnoringCacheData];
-        self.urlSession = [NSURLSession sessionWithConfiguration:sessionConfiguration delegate:self delegateQueue:nil]; // FortityFalsePositive
+        self.urlSession = [NSURLSession sessionWithConfiguration:sessionConfiguration delegate:self delegateQueue:nil];
         [wkWebView.configuration.userContentController addScriptMessageHandler:self name:@"nativeXHR"];
 
     }
@@ -125,7 +125,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 /*!
  * @param uri target relative file from the XMLHttpRequest polyfill
- * @return URL relative to the main bundle's www folder
+ * @return URL relative to the main bundle's www folder if no file:// prefix is provided. Otherwise the file url is used as is to support /Library paths
  */
 -(NSURL*)getWebContentResourceURL: (NSString*) uri
 {
@@ -147,17 +147,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 /*!
  * @discussion Verifying the standardized path of the target URL is under the www
- * folder of the main bundle.
+ * folder of the main bundle or under the application /Library folder
  *
- * @param targetURL target file under the www folder of the main bundle
- * @return true if the targetURL is within the www folder in the main bundle
+ * @param targetURL target file under either the www folder of the main bundle or under the application /Library folder
+ * @return true if the targetURL is within the www folder in the main bundle or under the application /Library folder
  */
 -(BOOL)isWebContentResourceSecure: (NSURL*) targetURL
 {
     NSURL *baseURL = [NSURL URLWithString:@"www" relativeToURL:[[NSBundle mainBundle] resourceURL]];
     NSString *basePath = [baseURL absoluteString];
     NSString *targetPath = [[targetURL standardizedURL] absoluteString];
-    return [targetPath hasPrefix:basePath];
+    
+    return [targetPath hasPrefix:basePath] ||
+           [targetPath hasPrefix:[[NSURL fileURLWithPath:
+                                   [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0]]  absoluteString]];
 }
 
 /*!
@@ -265,7 +268,7 @@ NS_ASSUME_NONNULL_BEGIN
           CFDataRef exceptions = SecTrustCopyExceptions (serverTrust);
           SecTrustSetExceptions (serverTrust, exceptions);
           CFRelease (exceptions);
-          completionHandler (NSURLSessionAuthChallengeUseCredential, [NSURLCredential credentialForTrust:serverTrust]); // FortityFalsePositive
+          completionHandler (NSURLSessionAuthChallengeUseCredential, [NSURLCredential credentialForTrust:serverTrust]);
          
           return;
         }
@@ -298,8 +301,7 @@ NS_ASSUME_NONNULL_BEGIN
     
     NSString *requestId = [body cdvwkStringForKey:@"id"];
     NSString *callbackFunction = [body cdvwkStringForKey:@"callback"];
-    NSString *urlStringNotEncoded = [body cdvwkStringForKey:@"url"];
-    NSString *urlString = [urlStringNotEncoded stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet];
+    NSString *urlString = [body cdvwkStringForKey:@"url"];
     NSString *method = [body cdvwkStringForKey:@"method"];
     
     __weak WKWebView* weakWebView = webView;
@@ -311,7 +313,7 @@ NS_ASSUME_NONNULL_BEGIN
             NSData* json = [NSJSONSerialization dataWithJSONObject:result options:0 error:&jsonError];
             
             if (jsonError != nil) {
-                NSLog(@"NativeXHR: Failed to encode response to json: %@", jsonError.localizedDescription); // FortityFalsePositive
+                NSLog(@"NativeXHR: Failed to encode response to json: %@", jsonError.localizedDescription);
                 
                 NSString *script = [NSString stringWithFormat:@"try { %@('%@', {'error' : 'json serialization failed'}) } catch (e) { }", callbackFunction, requestId];
                 [weakWebView evaluateJavaScript:script completionHandler:nil];
@@ -337,7 +339,7 @@ NS_ASSUME_NONNULL_BEGIN
     NSURL *url = [NSURL URLWithString:urlString];
     
     if (![url.scheme.lowercaseString isEqualToString:@"http"] && ![url.scheme.lowercaseString isEqualToString:@"https"]) {
-        NSString *msg = [NSString stringWithFormat:@"NativeXHR: Invalid url scheme '%@';  only http and https are supported by NativeXHR", urlString];
+        NSString *msg = [NSString stringWithFormat:@"NativeXHR: Invalid url scheme '%@';  only http and https are supported by NativeXHR", url.scheme];
         return sendResult( @{ @"error" : msg});
     }
     
@@ -365,7 +367,7 @@ NS_ASSUME_NONNULL_BEGIN
         request.HTTPBody = [[NSData alloc] initWithBase64EncodedString:body64 options:0];
     }
     
-    NSURLSessionDataTask *task = [self.urlSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) { // FortityFalsePositive
+    NSURLSessionDataTask *task = [self.urlSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         
         NSMutableDictionary* result = [NSMutableDictionary dictionary];
         
