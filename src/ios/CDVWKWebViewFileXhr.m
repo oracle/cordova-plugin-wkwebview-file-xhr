@@ -268,7 +268,7 @@ NS_ASSUME_NONNULL_BEGIN
           CFDataRef exceptions = SecTrustCopyExceptions (serverTrust);
           SecTrustSetExceptions (serverTrust, exceptions);
           CFRelease (exceptions);
-          completionHandler (NSURLSessionAuthChallengeUseCredential, [NSURLCredential credentialForTrust:serverTrust]);
+          completionHandler (NSURLSessionAuthChallengeUseCredential, [NSURLCredential credentialForTrust:serverTrust]); // FortityFalsePositive
          
           return;
         }
@@ -301,7 +301,8 @@ NS_ASSUME_NONNULL_BEGIN
     
     NSString *requestId = [body cdvwkStringForKey:@"id"];
     NSString *callbackFunction = [body cdvwkStringForKey:@"callback"];
-    NSString *urlString = [body cdvwkStringForKey:@"url"];
+    NSString *urlStringNotEncoded = [body cdvwkStringForKey:@"url"];
+    NSString *urlString = [urlStringNotEncoded stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet];
     NSString *method = [body cdvwkStringForKey:@"method"];
     
     __weak WKWebView* weakWebView = webView;
@@ -313,7 +314,7 @@ NS_ASSUME_NONNULL_BEGIN
             NSData* json = [NSJSONSerialization dataWithJSONObject:result options:0 error:&jsonError];
             
             if (jsonError != nil) {
-                NSLog(@"NativeXHR: Failed to encode response to json: %@", jsonError.localizedDescription);
+                NSLog(@"NativeXHR: Failed to encode response to json: %@", jsonError.localizedDescription); // FortityFalsePositive
                 
                 NSString *script = [NSString stringWithFormat:@"try { %@('%@', {'error' : 'json serialization failed'}) } catch (e) { }", callbackFunction, requestId];
                 [weakWebView evaluateJavaScript:script completionHandler:nil];
@@ -339,7 +340,7 @@ NS_ASSUME_NONNULL_BEGIN
     NSURL *url = [NSURL URLWithString:urlString];
     
     if (![url.scheme.lowercaseString isEqualToString:@"http"] && ![url.scheme.lowercaseString isEqualToString:@"https"]) {
-        NSString *msg = [NSString stringWithFormat:@"NativeXHR: Invalid url scheme '%@';  only http and https are supported by NativeXHR", url.scheme];
+        NSString *msg = [NSString stringWithFormat:@"NativeXHR: Invalid url scheme '%@';  only http and https are supported by NativeXHR", urlString];
         return sendResult( @{ @"error" : msg});
     }
     
@@ -367,7 +368,7 @@ NS_ASSUME_NONNULL_BEGIN
         request.HTTPBody = [[NSData alloc] initWithBase64EncodedString:body64 options:0];
     }
     
-    NSURLSessionDataTask *task = [self.urlSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+    NSURLSessionDataTask *task = [self.urlSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) { // FortityFalsePositive
         
         NSMutableDictionary* result = [NSMutableDictionary dictionary];
         
