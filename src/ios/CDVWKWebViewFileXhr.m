@@ -125,7 +125,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 /*!
  * @param uri target relative file from the XMLHttpRequest polyfill
- * @return URL relative to the main bundle's www folder
+ * @return URL relative to the main bundle's www folder if no file:// prefix is provided. Otherwise the file url is used as is to support /Library paths
  */
 -(NSURL*)getWebContentResourceURL: (NSString*) uri
 {
@@ -147,17 +147,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 /*!
  * @discussion Verifying the standardized path of the target URL is under the www
- * folder of the main bundle.
+ * folder of the main bundle or under the application /Library folder
  *
- * @param targetURL target file under the www folder of the main bundle
- * @return true if the targetURL is within the www folder in the main bundle
+ * @param targetURL target file under either the www folder of the main bundle or under the application /Library folder
+ * @return true if the targetURL is within the www folder in the main bundle or under the application /Library folder
  */
 -(BOOL)isWebContentResourceSecure: (NSURL*) targetURL
 {
     NSURL *baseURL = [NSURL URLWithString:@"www" relativeToURL:[[NSBundle mainBundle] resourceURL]];
     NSString *basePath = [baseURL absoluteString];
     NSString *targetPath = [[targetURL standardizedURL] absoluteString];
-    return [targetPath hasPrefix:basePath];
+    
+    return [targetPath hasPrefix:basePath] ||
+           [targetPath hasPrefix:[[NSURL fileURLWithPath:
+                                   [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0]]  absoluteString]];
 }
 
 /*!
