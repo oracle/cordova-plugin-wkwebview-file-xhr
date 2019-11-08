@@ -301,8 +301,7 @@ NS_ASSUME_NONNULL_BEGIN
     
     NSString *requestId = [body cdvwkStringForKey:@"id"];
     NSString *callbackFunction = [body cdvwkStringForKey:@"callback"];
-    NSString *urlStringNotEncoded = [body cdvwkStringForKey:@"url"];
-    NSString *urlString = [urlStringNotEncoded stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet];
+    NSString *urlString = [body cdvwkStringForKey:@"url"];
     NSString *method = [body cdvwkStringForKey:@"method"];
     
     __weak WKWebView* weakWebView = webView;
@@ -340,7 +339,7 @@ NS_ASSUME_NONNULL_BEGIN
     NSURL *url = [NSURL URLWithString:urlString];
     
     if (![url.scheme.lowercaseString isEqualToString:@"http"] && ![url.scheme.lowercaseString isEqualToString:@"https"]) {
-        NSString *msg = [NSString stringWithFormat:@"NativeXHR: Invalid url scheme '%@';  only http and https are supported by NativeXHR", urlString];
+        NSString *msg = [NSString stringWithFormat:@"NativeXHR: Invalid url scheme '%@';  only http and https are supported by NativeXHR", url.scheme];
         return sendResult( @{ @"error" : msg});
     }
     
