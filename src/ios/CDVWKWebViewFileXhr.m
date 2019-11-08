@@ -83,7 +83,7 @@ NS_ASSUME_NONNULL_BEGIN
     }
     
     value = [self.commandDelegate.settings cdvwkStringForKey:@"interceptremoterequests"];
-    if (value != nil && 
+    if (value != nil &&
         ([value compare:@"all" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
          [value compare:@"secureOnly" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
          [value compare:@"none" options:NSCaseInsensitiveSearch] == NSOrderedSame)) {
@@ -221,7 +221,7 @@ NS_ASSUME_NONNULL_BEGIN
         // this catches nil value or empty string
         [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsInt:404] callbackId:command.callbackId];
         return;
-    } 
+    }
     NSURL *targetURL = [self getWebContentResourceURL:uri];
     
     if (![self isWebContentResourceSecure:targetURL]) {
@@ -294,15 +294,24 @@ NS_ASSUME_NONNULL_BEGIN
  *     body     | string (base 64 encoded) | false    | The http request body          |
  *     timeout  | number                   | false    | Request timeout (seconds)      | any positive value
  *
- * The callback function takes two arguments.  The first argument is the unique identifier supplied in the request 
+ * The callback function takes two arguments.  The first argument is the unique identifier supplied in the request
  * object.  The second argument is a java object defining the HTTP result.
  */
 - (void) performNativeXHR:(NSDictionary<NSString *, id> *) body inWebView:(WKWebView *) webView {
     
     NSString *requestId = [body cdvwkStringForKey:@"id"];
     NSString *callbackFunction = [body cdvwkStringForKey:@"callback"];
-    NSString *urlStringNotEncoded = [body cdvwkStringForKey:@"url"];
-    NSString *urlString = [urlStringNotEncoded stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet];
+    NSString *originalUrlString = [body cdvwkStringForKey:@"url"];
+    NSString *decodedUrlString = [originalUrlString stringByRemovingPercentEncoding];
+    NSString *urlString = @"";
+
+    if ([originalUrlString isEqualToString:decodedUrlString])
+    {
+        urlString = [originalUrlString stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet];
+    }
+    else {
+        urlString = originalUrlString;
+    }
     NSString *method = [body cdvwkStringForKey:@"method"];
     
     __weak WKWebView* weakWebView = webView;
@@ -386,7 +395,7 @@ NS_ASSUME_NONNULL_BEGIN
                 NSHTTPURLResponse* urlResponse = (NSHTTPURLResponse *) response;
                 dictionary[@"allHeaderFields"] = urlResponse.allHeaderFields;
                 dictionary[@"statusCode"] = @(urlResponse.statusCode);
-                dictionary[@"localizedStatusCode"] = [NSHTTPURLResponse localizedStringForStatusCode:urlResponse.statusCode];                    
+                dictionary[@"localizedStatusCode"] = [NSHTTPURLResponse localizedStringForStatusCode:urlResponse.statusCode];
             }
             
             result[@"response"] = dictionary;
