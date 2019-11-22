@@ -80,6 +80,14 @@
     }
   }
 
+  if( 'Symbol' in window && typeof Symbol() === 'symbol'){
+    Object.defineProperty( __FormData.prototype, Symbol.toStringTag, {
+      get : function(){
+        return 'FormData';
+      }
+    });
+  }
+
   __FormData.prototype.get = function (name)
   {
     var values = this.getAll(name);
