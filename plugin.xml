@@ -27,7 +27,6 @@
     <license>UPL 1.0</license> 
     <keywords>cordova,wkwebview,webview</keywords>
     <repo>https://github.com/oracle/cordova-plugin-wkwebview-file-xhr.git</repo>
-    <dependency id="cordova-plugin-wkwebview-engine" />
     <engines>
       <engine name="cordova-ios" version=">=4.0.0" />
       <engine name="apple-ios" version=">=9.0" />
