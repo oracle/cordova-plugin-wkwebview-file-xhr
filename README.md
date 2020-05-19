@@ -1,3 +1,13 @@
+# NOTICE FOR DEVELOPERS USING WKWebView AND MapBox GL JS
+
+This fork fixes the issue that URLs are not correctly escaped. This is specifically an issue for programmers using WKWebView and MapBox GL JS in their Cordova apps.
+
+If you are receiving the error "ERROR: {message: "Bad request"}" after switching to WKWebView, then this is the fix for you!
+
+Unfortunately, Oracle (who developed this plugin originally) aren't accepting pull requests, so a fork is the only option.
+
+See: https://github.com/oracle/cordova-plugin-wkwebview-file-xhr/issues/53
+
 # cordova-plugin-wkwebview-file-xhr 2.1.4
 
 ## About the cordova-plugin-wkwebview-file-xhr
