@@ -1,4 +1,4 @@
-# cordova-plugin-wkwebview-file-xhr 2.1.4
+# cordova-plugin-wkwebview-file-xhr 3.0.0
 
 ## About the cordova-plugin-wkwebview-file-xhr
 
@@ -16,6 +16,12 @@ Plugin installation requires Cordova 4+ and iOS 9+. It will install the Apache C
 cordova plugin add cordova-plugin-wkwebview-file-xhr
 ```
 
+Note : If your cordova-ios version is less than 6.0.0. You need to add following dependency to plugin.xml
+```
+<dependency id="cordova-plugin-wkwebview-engine" />
+```
+Alternatively you can use this plugin's version 2.1.4
+
 ## Supported Platforms
 
 * iOS
@@ -28,7 +34,7 @@ var xhr = new XMLHttpRequest();
 xhr.addEventListener("loadend", function(evt)
  {
    var data = this.responseText;
-   document.getElementById("myregion").innerHtml = data;
+   document.getElementById("myregion").innerHTML = data;
  });
 
 xhr.open("GET", "js/views/customers.html");
