@@ -1135,7 +1135,7 @@
     var names = Object.keys(responseHeaders);
     var list = [];
     for (var i = 0; i < names.length; i++)
-      list.push([names[i], responseHeaders[names[i]]].join(":"));
+      list.push([names[i], responseHeaders[names[i]]].join(": "));
 
     return list.join("\n");
   };
