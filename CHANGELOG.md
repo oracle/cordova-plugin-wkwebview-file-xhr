@@ -1,4 +1,7 @@
 # Change Log
+## cordova-plugin-wkwebview-file-xhr v3.1.0 (07/07/2022)
+* Fix content-disposition case issue (issue #88).
+
 ## cordova-plugin-wkwebview-file-xhr v3.0.0 (09/09/2020)
 * Upgraded to support cordova-ios 6.0 by removing dependency from wkwebview engine. (issue #55)
 * Fix HEADERS_RECEIVED const typo (issue #37).
