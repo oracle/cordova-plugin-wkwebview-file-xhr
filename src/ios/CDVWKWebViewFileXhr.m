@@ -340,6 +340,7 @@ NS_ASSUME_NONNULL_BEGIN
     if ([urlString rangeOfString:@"%"].location == NSNotFound) {
         url = [NSURL URLWithString:[urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     } else {
+        urlString = [urlString stringByReplacingOccurrencesOfString:@" " withString:@"%20"];  // BUGFIX: Meteoblue encodes everything except spaces!
         url = [NSURL URLWithString:urlString];
     }
     
