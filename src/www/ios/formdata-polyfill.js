@@ -332,7 +332,7 @@
     data.push("--" + boundary + "\r\n");
     if (!entry['filename'])
     {
-      data.push('content-disposition: form-data; name="');
+      data.push('Content-Disposition: form-data; name="');
       data.push(entry.name);
       data.push('"\r\n');
       data.push('\r\n');
@@ -342,7 +342,7 @@
     else
     {
       // Describe it as form data
-      data.push('content-disposition: form-data; name="');
+      data.push('Content-Disposition: form-data; name="');
       data.push(entry.name)
       data.push('"; filename="');
       data.push(entry.filename);
