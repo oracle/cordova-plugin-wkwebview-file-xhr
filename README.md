@@ -75,9 +75,12 @@ Whilst this plugin resolves the main issues preventing the use of the Apache Cor
 ### [Changes](CHANGELOG.md)
 See [CHANGELOG](CHANGELOG.md).
 
-### [Contributing](CONTRIBUTING.md)
-This is an open source project maintained by Oracle Corp. Pull Requests are currently not being accepted. See [CONTRIBUTING](CONTRIBUTING.md) for details.
+### Contributing
+This project is not accepting external contributions at this time. For bugs or enhancement requests, please file a GitHub issue unless it’s security related. When filing a bug remember that the better written the bug is, the more likely it is to be fixed. If you think you’ve found a security vulnerability, do not raise a GitHub issue and follow the instructions in our [security policy](./SECURITY.md).
+
+### Security
+Please consult the [security guide](./SECURITY.md) for our responsible security vulnerability disclosure process
 
 ### [License](LICENSE.md)
-Copyright (c) 2018 Oracle and/or its affiliates
+Copyright (c) 2018, 2023 Oracle and/or its affiliates
 The Universal Permissive License (UPL), Version 1.0
