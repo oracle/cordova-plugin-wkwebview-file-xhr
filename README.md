@@ -81,6 +81,6 @@ This project is not accepting external contributions at this time. For bugs or e
 ### Security
 Please consult the [security guide](./SECURITY.md) for our responsible security vulnerability disclosure process
 
-### [License](LICENSE.md)
+### License
 Copyright (c) 2018, 2023 Oracle and/or its affiliates
 The Universal Permissive License (UPL), Version 1.0
