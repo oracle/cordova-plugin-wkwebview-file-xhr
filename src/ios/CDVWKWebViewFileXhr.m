@@ -336,7 +336,13 @@ NS_ASSUME_NONNULL_BEGIN
         return sendResult( @{ @"error" : @"Invalid url"});
     }
     
-    NSURL *url = [NSURL URLWithString:urlString];
+    NSURL *url;
+    if ([urlString rangeOfString:@"%"].location == NSNotFound) {
+        url = [NSURL URLWithString:[urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    } else {
+        urlString = [urlString stringByReplacingOccurrencesOfString:@" " withString:@"%20"];  // BUGFIX: Meteoblue encodes everything except spaces!
+        url = [NSURL URLWithString:urlString];
+    }
     
     if (![url.scheme.lowercaseString isEqualToString:@"http"] && ![url.scheme.lowercaseString isEqualToString:@"https"]) {
         NSString *msg = [NSString stringWithFormat:@"NativeXHR: Invalid url scheme '%@';  only http and https are supported by NativeXHR", url.scheme];
