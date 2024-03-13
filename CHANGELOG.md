@@ -1,4 +1,7 @@
 # Change Log
+## cordova-plugin-wkwebview-file-xhr v3.1.1 (03/13/2024)
+* Version update in docs
+
 ## cordova-plugin-wkwebview-file-xhr v3.1.0 (07/07/2022)
 * Fix content-disposition case issue (issue #88).
 

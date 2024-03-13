@@ -1,4 +1,4 @@
-# cordova-plugin-wkwebview-file-xhr 3.1.0
+# cordova-plugin-wkwebview-file-xhr 3.1.1
 
 ## About the cordova-plugin-wkwebview-file-xhr
 
