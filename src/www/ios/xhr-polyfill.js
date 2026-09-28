@@ -190,7 +190,7 @@
     reqContext.status = 404;
     reqContext.responseText = "File Not Found";
 
-    reqContext.dispatchReadyStateChangeEvent(2); // HEADERS_RECIEVED
+    reqContext.dispatchReadyStateChangeEvent(2); // HEADERS_RECEIVED
     reqContext.dispatchReadyStateChangeEvent(3); // LOADING
     reqContext.dispatchProgressEvent("progress");
 
@@ -215,7 +215,7 @@
     reqContext.statusText = "OK";
     reqContext.responseURL = reqContext.url;
 
-    reqContext.dispatchReadyStateChangeEvent(2); // HEADERS_RECIEVED
+    reqContext.dispatchReadyStateChangeEvent(2); // HEADERS_RECEIVED
     reqContext.dispatchReadyStateChangeEvent(3); // LOADING
     reqContext.dispatchProgressEvent("progress", respSize);
     reqContext.dispatchReadyStateChangeEvent(4); // DONE
@@ -654,7 +654,7 @@
 
     var respSize = rspTypeHandler.responseSize();
 
-    reqContext.dispatchReadyStateChangeEvent(2); //HEADERS_RECIEVED
+    reqContext.dispatchReadyStateChangeEvent(2); //HEADERS_RECEIVED
     reqContext.dispatchReadyStateChangeEvent(3); //LOADING
     reqContext.dispatchProgressEvent("progress", respSize);
     reqContext.dispatchReadyStateChangeEvent(4); //DONE
@@ -679,7 +679,7 @@
       reqContext.responseText = error;
     }
 
-    reqContext.dispatchReadyStateChangeEvent(2); //HEADERS_RECIEVED
+    reqContext.dispatchReadyStateChangeEvent(2); //HEADERS_RECEIVED
     reqContext.dispatchReadyStateChangeEvent(3); //LOADING
     reqContext.dispatchProgressEvent("progress");
     reqContext.dispatchReadyStateChangeEvent(4); //DONE
@@ -781,7 +781,7 @@
   DelegateHandler._readystatechangeEventRelay = function (reqContext, delegate, event)
   {
 
-    if (delegate.readyState > 1)  // readyState gt HEADERS_RECIEVED
+    if (delegate.readyState > 1)  // readyState gt HEADERS_RECEIVED
     {
       if (Object.keys(reqContext.responseHeaders).length === 0)
         DelegateHandler._parseResponseHeaders(delegate, reqContext.responseHeaders);
@@ -1019,7 +1019,7 @@
 
 
   // define readonly const properties
-  ["UNSENT", "OPENED", "HEADERS_RECIEVED", "LOADING", "DONE"].forEach(function (propName, i)
+  ["UNSENT", "OPENED", "HEADERS_RECEIVED", "LOADING", "DONE"].forEach(function (propName, i)
   {
     Object.defineProperty(window.XMLHttpRequest.prototype, propName,
       {

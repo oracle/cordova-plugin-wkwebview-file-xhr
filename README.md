@@ -1,4 +1,4 @@
-# cordova-plugin-wkwebview-file-xhr 2.1.4
+# cordova-plugin-wkwebview-file-xhr 3.1.1
 
 ## About the cordova-plugin-wkwebview-file-xhr
 
@@ -16,6 +16,12 @@ Plugin installation requires Cordova 4+ and iOS 9+. It will install the Apache C
 cordova plugin add cordova-plugin-wkwebview-file-xhr
 ```
 
+Note : If your cordova-ios version is less than 6.0.0. You need to add following dependency to plugin.xml
+```
+<dependency id="cordova-plugin-wkwebview-engine" />
+```
+Alternatively you can use this plugin's version 2.1.4
+
 ## Supported Platforms
 
 * iOS
@@ -28,7 +34,7 @@ var xhr = new XMLHttpRequest();
 xhr.addEventListener("loadend", function(evt)
  {
    var data = this.responseText;
-   document.getElementById("myregion").innerHtml = data;
+   document.getElementById("myregion").innerHTML = data;
  });
 
 xhr.open("GET", "js/views/customers.html");
@@ -69,9 +75,12 @@ Whilst this plugin resolves the main issues preventing the use of the Apache Cor
 ### [Changes](CHANGELOG.md)
 See [CHANGELOG](CHANGELOG.md).
 
-### [Contributing](CONTRIBUTING.md)
-This is an open source project maintained by Oracle Corp. Pull Requests are currently not being accepted. See [CONTRIBUTING](CONTRIBUTING.md) for details.
+### Contributing
+This project is not accepting external contributions at this time. For bugs or enhancement requests, please file a GitHub issue unless it’s security related. When filing a bug remember that the better written the bug is, the more likely it is to be fixed. If you think you’ve found a security vulnerability, do not raise a GitHub issue and follow the instructions in our [security policy](./SECURITY.md).
 
-### [License](LICENSE.md)
-Copyright (c) 2018 Oracle and/or its affiliates
+### Security
+Please consult the [security guide](./SECURITY.md) for our responsible security vulnerability disclosure process
+
+### License
+Copyright (c) 2018, 2023 Oracle and/or its affiliates
 The Universal Permissive License (UPL), Version 1.0
